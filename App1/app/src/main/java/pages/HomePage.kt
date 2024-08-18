@@ -1,20 +1,30 @@
 package pages
 
-//import com.google.maps.android.compose.CameraPosition
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -90,6 +100,9 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
         }
     }
 
+    // Dropdown menu state
+    var expanded by remember { mutableStateOf(false) }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -97,13 +110,42 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        // Top-right corner dropdown button
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentSize(Alignment.TopEnd)
+        ) {
+            IconButton(onClick = { expanded = true }) {
+                Icon(imageVector = Icons.Default.MoreVert, contentDescription = "More options")
+            }
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
+            ) {
+                DropdownMenuItem(
+                    text = { Text("User Profile") },
+                    onClick = {
+                        expanded = false
+                        navController.navigate("user_profile")
+                    }
+                )
+                DropdownMenuItem(
+                    text = { Text("All Users") },
+                    onClick = {
+                        expanded = false
+                        navController.navigate("all_users")
+                    }
+                )
+            }
+        }
+
         Text(text = "Home Page", fontSize = 32.sp)
 
         // Add Google Map
         GoogleMap(
             modifier = Modifier
-                .fillMaxSize()
-                .weight(1f),
+                .fillMaxSize(),
             cameraPositionState = cameraPositionState
         ) {
             currentLocation.value?.let {

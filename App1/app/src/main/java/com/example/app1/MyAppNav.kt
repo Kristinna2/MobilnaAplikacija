@@ -9,6 +9,8 @@ import androidx.navigation.compose.rememberNavController
 import pages.HomePage
 import pages.LoginPage
 import pages.RegisterPage
+import pages.UserProfilePage
+import pages.UsersPage
 
 @Composable
 fun MyAppNavigation(modifier: Modifier = Modifier,authViewModel: AuthViewModel) {
@@ -24,5 +26,13 @@ fun MyAppNavigation(modifier: Modifier = Modifier,authViewModel: AuthViewModel) 
         composable("home"){
             HomePage(modifier,navController,authViewModel)
         }
+        composable("user_profile") {
+            UserProfilePage(modifier,navController,authViewModel)
+        }
+        composable("all_users") {
+            UsersPage(navController=navController)
+        }
+
     })
+
 }
