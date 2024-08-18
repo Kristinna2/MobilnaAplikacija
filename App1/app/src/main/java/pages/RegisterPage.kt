@@ -2,6 +2,7 @@ package pages
 
 //import com.example.App1.AuthState
 
+import android.content.Context
 import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -216,7 +217,9 @@ fun RegisterPage(
 
         Button(
             onClick = {
-                authViewModel.signup(firstName, lastName, email, password, phoneNumber, photoUri)
+                if (validateForm(context, firstName, lastName, email, password, phoneNumber)) {
+                    authViewModel.signup(firstName, lastName, email, password, phoneNumber, photoUri)
+                }
             },
             enabled = authState.value != AuthState.Loading,
             shape = RoundedCornerShape(12.dp),
@@ -235,6 +238,35 @@ fun RegisterPage(
         }) {
             Text(text = "Already have an account? Log in", fontSize = 18.sp, color = Color(0xFFF75553)) // Vibrant Blue text
         }
+    }
+}
+fun validateForm(context: Context, firstName: String, lastName: String, email: String, password: String, phoneNumber: String): Boolean {
+    return when {
+        firstName.isBlank() -> {
+            Toast.makeText(context, "First Name is required", Toast.LENGTH_SHORT).show()
+            false
+        }
+        lastName.isBlank() -> {
+            Toast.makeText(context, "Last Name is required", Toast.LENGTH_SHORT).show()
+            false
+        }
+        email.isBlank() -> {
+            Toast.makeText(context, "Email is required", Toast.LENGTH_SHORT).show()
+            false
+        }
+        password.isBlank() -> {
+            Toast.makeText(context, "Password is required", Toast.LENGTH_SHORT).show()
+            false
+        }
+        phoneNumber.isBlank() -> {
+            Toast.makeText(context, "Phone Number is required", Toast.LENGTH_SHORT).show()
+            false
+        }
+        !isValidPhoneNumber(phoneNumber) -> {
+            Toast.makeText(context, "Invalid Phone Number", Toast.LENGTH_SHORT).show()
+            false
+        }
+        else -> true
     }
 }
 
