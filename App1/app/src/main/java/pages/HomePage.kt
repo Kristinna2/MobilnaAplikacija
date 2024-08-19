@@ -1,13 +1,20 @@
 package pages
+
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.util.Log
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
@@ -30,7 +37,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -55,20 +64,15 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
     val context = LocalContext.current
     val authState = authViewModel.authState.observeAsState()
 
-    // Manage current location state
     val currentLocation = remember { mutableStateOf<LatLng?>(null) }
-
-    // Initialize FusedLocationProviderClient
     val fusedLocationClient: FusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context)
 
-    // Request location updates
     val locationRequest = com.google.android.gms.location.LocationRequest.create().apply {
-        interval = 10000 // Update interval in milliseconds
-        fastestInterval = 5000 // Fastest update interval in milliseconds
+        interval = 10000
+        fastestInterval = 5000
         priority = com.google.android.gms.location.LocationRequest.PRIORITY_HIGH_ACCURACY
     }
 
-    // Start location updates
     LaunchedEffect(Unit) {
         if (ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             fusedLocationClient.requestLocationUpdates(locationRequest, object : com.google.android.gms.location.LocationCallback() {
@@ -81,7 +85,6 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
                 }
             }, null)
         } else {
-            // Handle the case where permission is not granted
             println("Location permission not granted")
         }
     }
@@ -93,35 +96,33 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
         }
     }
 
-    // Create a CameraPositionState to control the map's camera
     val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(LatLng(0.0, 0.0), 15f) // Default position
+        position = CameraPosition.fromLatLngZoom(LatLng(0.0, 0.0), 15f)
     }
 
-    // Update the camera position when the current location is available
     LaunchedEffect(currentLocation.value) {
         currentLocation.value?.let {
             cameraPositionState.position = CameraPosition.fromLatLngZoom(it, 15f)
         }
     }
 
-    // State to store all added markers
     val markers = remember { mutableStateListOf<Pair<LatLng, String>>() }
     var selectedMarker by remember { mutableStateOf<LatLng?>(null) }
     var showDialog by remember { mutableStateOf(false) }
     val markerName = remember { mutableStateOf(TextFieldValue("")) }
 
-    // Dropdown menu state
     var expanded by remember { mutableStateOf(false) }
 
     if (showDialog) {
-        // Show a dialog to input marker name
         MarkerNameDialog(
             markerName = markerName,
             onDismiss = { showDialog = false },
             onConfirm = {
                 markers.add(Pair(selectedMarker!!, markerName.value.text))
                 showDialog = false
+            },
+            onOpen = {
+                markerName.value = TextFieldValue("") // Resetovanje unosa pri otvaranju dijaloga
             }
         )
     }
@@ -129,74 +130,117 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+            .background(Color(0xFFC9E2F3)) // Pozadina aplikacije na svetlu plavu boju
+            .padding(16.dp)
     ) {
-        // Top-right corner dropdown button
+        // Raspored za naslov i ikonu
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Spacer(modifier = Modifier.weight(1f))
+            Text(
+                text = "Trace the Events",
+                fontSize = 32.sp,
+                fontWeight = FontWeight.Bold, // Podebljani font za naglašavanje
+                color = Color(0xFFF75553), // Tamno plava boja za tekst
+                modifier = Modifier
+                    .padding(vertical = 16.dp) // Povećana vertikalna margina za bolji razmak
+            )
+
+            Box(
+                modifier = Modifier
+                    .wrapContentSize(Alignment.TopEnd)
+            ) {
+                IconButton(onClick = { expanded = true }) {
+                    Icon(
+                        imageVector = Icons.Default.MoreVert,
+                        contentDescription = "More options",
+                        modifier = Modifier.size(24.dp),
+                        tint = Color.Blue // Boja ikone
+                    )
+                }
+                DropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false },
+                    modifier = Modifier
+                        .background(Color(0xFFF75553)) // Boja pozadine menija
+                ) {
+                    DropdownMenuItem(
+                        text = { Text("User Profile", color = Color.White) },
+                        onClick = {
+                            expanded = false
+                            navController.navigate("user_profile")
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("All Users", color = Color.White) },
+                        onClick = {
+                            expanded = false
+                            navController.navigate("all_users")
+                        }
+                    )
+                }
+            }
+        }
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(8.dp)
+                .weight(1f) // Povećaj visinu mape
+        ) {
+            GoogleMap(
+                modifier = Modifier.fillMaxSize(),
+                cameraPositionState = cameraPositionState,
+                onMapClick = { latLng ->
+                    selectedMarker = latLng
+                    showDialog = true
+                }
+            ) {
+                currentLocation.value?.let {
+                    Marker(
+                        state = MarkerState(position = it),
+                        title = "My Location",
+                        icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)
+                    )
+                }
+                markers.forEach { (location, name) ->
+                    Marker(
+                        state = MarkerState(position = location),
+                        title = name,
+                        onInfoWindowClick = {
+                            markers.remove(Pair(location, name))
+                        }
+                    )
+                }
+            }
+        }
+
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .wrapContentSize(Alignment.TopEnd)
+                .padding(vertical = 8.dp)
         ) {
-            IconButton(onClick = { expanded = true }) {
-                Icon(imageVector = Icons.Default.MoreVert, contentDescription = "More options")
-            }
-            DropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false }
+            TextButton(
+                onClick = {
+                    authViewModel.signout()
+                },
+                modifier = Modifier
+                    .width(120.dp)
+                    .height(65.dp)
+                    .background(Color(0xFFF75553)) // Pozadina dugmeta
+                    .padding(vertical = 12.dp) // Razmak unutar dugmeta
             ) {
-                DropdownMenuItem(
-                    text = { Text("User Profile") },
-                    onClick = {
-                        expanded = false
-                        navController.navigate("user_profile")
-                    }
-                )
-                DropdownMenuItem(
-                    text = { Text("All Users") },
-                    onClick = {
-                        expanded = false
-                        navController.navigate("all_users")
-                    }
+                Text(
+                    text = "Sign out",
+                    fontSize = 18.sp,
+                    color = Color.White
                 )
             }
-        }
-
-        Text(text = "Home Page", fontSize = 32.sp)
-
-        // Add Google Map
-        GoogleMap(
-            modifier = Modifier.fillMaxSize(),
-            cameraPositionState = cameraPositionState,
-            onMapClick = { latLng ->
-                selectedMarker = latLng
-                showDialog = true // Show dialog to name the marker
-            }
-        ) {
-            currentLocation.value?.let {
-                Marker(
-                    state = MarkerState(position = it),
-                    title = "My Location",
-                    icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE) // Different color for initial location
-                )
-            }
-            // Add markers from the list
-            markers.forEach { (location, name) ->
-                Marker(
-                    state = MarkerState(position = location),
-                    title = name,
-                    onInfoWindowClick = {
-                        markers.remove(Pair(location, name)) // Remove the selected marker
-                    }
-                )
-            }
-        }
-
-        TextButton(onClick = {
-            authViewModel.signout()
-        }) {
-            Text(text = "Sign out")
         }
     }
 }
@@ -205,8 +249,13 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
 fun MarkerNameDialog(
     markerName: MutableState<TextFieldValue>,
     onDismiss: () -> Unit,
-    onConfirm: () -> Unit
+    onConfirm: () -> Unit,
+    onOpen: () -> Unit // Dodata funkcija koja se poziva pri otvaranju dijaloga
 ) {
+    LaunchedEffect(Unit) {
+        onOpen() // Resetovanje unosa prilikom otvaranja dijaloga
+    }
+
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(text = "Marker Name") },
