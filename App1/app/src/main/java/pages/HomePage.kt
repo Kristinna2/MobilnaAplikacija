@@ -11,14 +11,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -122,7 +122,7 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
                 showDialog = false
             },
             onOpen = {
-                markerName.value = TextFieldValue("") // Resetovanje unosa pri otvaranju dijaloga
+                markerName.value = TextFieldValue("")// Resetovanje unosa pri otvaranju dijaloga
             }
         )
     }
@@ -213,6 +213,7 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
                         state = MarkerState(position = location),
                         title = name,
                         onInfoWindowClick = {
+                            Log.d("HomePage", "Clicked on marker: $name")
                             markers.remove(Pair(location, name))
                         }
                     )
@@ -223,24 +224,54 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 8.dp)
+                .padding(vertical = 16.dp)
+                //.align(Alignment.BottomCenter) // Uređeno da budu na dnu
         ) {
-            TextButton(
-                onClick = {
-                    authViewModel.signout()
-                },
-                modifier = Modifier
-                    .width(120.dp)
-                    .height(65.dp)
-                    .background(Color(0xFFF75553)) // Pozadina dugmeta
-                    .padding(vertical = 12.dp) // Razmak unutar dugmeta
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(
-                    text = "Sign out",
-                    fontSize = 18.sp,
-                    color = Color.White
-                )
+                Button(
+                    onClick = {
+                        authViewModel.signout()
+                    },
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(end = 8.dp) // Razmak između dugmadi
+                        .size(60.dp), // Okruglo dugme
+                    shape = RoundedCornerShape(30.dp), // Okrugli oblik
+                    colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFF75553) // Boja pozadine dugmeta
+                    )
+                ) {
+                    Text(
+                        text = "Sign out",
+                        fontSize = 16.sp,
+                        color = Color.White
+                    )
+                }
+
+                Button(
+                    onClick = {
+                        navController.navigate("location_service") // Navigacija na novu stranicu
+                    },
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(start = 8.dp) // Razmak između dugmadi
+                        .size(60.dp), // Okruglo dugme
+                    shape = RoundedCornerShape(30.dp), // Okrugli oblik
+                    colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFF75553) // Boja pozadine dugmeta
+                    )
+                ) {
+                    Text(
+                        text = "Location",
+                        fontSize = 16.sp,
+                        color = Color.White
+                    )
+                }
             }
+
         }
     }
 }
