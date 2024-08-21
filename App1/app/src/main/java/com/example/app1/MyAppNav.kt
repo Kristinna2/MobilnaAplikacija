@@ -6,6 +6,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import pages.EventDetailsPage
 import pages.HomePage
 import pages.LocationServicePage
 import pages.LoginPage
@@ -35,6 +36,9 @@ fun MyAppNavigation(modifier: Modifier = Modifier,authViewModel: AuthViewModel) 
         }
         composable("location_service") {
             LocationServicePage(modifier,navController) // Stranica za uslugu lokacije
+        }
+        composable("event_details") {
+            EventDetailsPage(navController = navController)
         }
 
     })

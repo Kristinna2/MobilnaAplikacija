@@ -113,6 +113,12 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
 
     var expanded by remember { mutableStateOf(false) }
 
+    // Search bar state
+    val searchQuery = remember { mutableStateOf(TextFieldValue("")) }
+
+    // Filter buttons state
+    var selectedColor by remember { mutableStateOf<Color?>(null) }
+
     if (showDialog) {
         MarkerNameDialog(
             markerName = markerName,
@@ -183,6 +189,13 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
                             navController.navigate("all_users")
                         }
                     )
+                    DropdownMenuItem(
+                        text = { Text("Sign out", color = Color.White) },
+                        onClick = {
+                            expanded = false
+                            authViewModel.signout()
+                        }
+                    )
                 }
             }
         }
@@ -225,7 +238,6 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 16.dp)
-                //.align(Alignment.BottomCenter) // Uređeno da budu na dnu
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -233,7 +245,7 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
             ) {
                 Button(
                     onClick = {
-                        authViewModel.signout()
+                        // Dodaj akciju za dugme "Filter"
                     },
                     modifier = Modifier
                         .weight(1f)
@@ -245,7 +257,7 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
                     )
                 ) {
                     Text(
-                        text = "Sign out",
+                        text = "Filter",
                         fontSize = 16.sp,
                         color = Color.White
                     )
@@ -253,7 +265,28 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
 
                 Button(
                     onClick = {
-                        navController.navigate("location_service") // Navigacija na novu stranicu
+                        navController.navigate("event_details")
+                    },
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(start = 8.dp, end = 8.dp) // Razmak između dugmadi
+                        .size(60.dp), // Okruglo dugme
+                    shape = RoundedCornerShape(30.dp), // Okrugli oblik
+                    colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFF75553) // Boja pozadine dugmeta
+                    )
+                ) {
+                    Text(
+                        text = "Dodaj",
+                        fontSize = 16.sp,
+                        color = Color.White
+                    )
+                }
+
+                Button(
+                    onClick = {
+                        // Navigacija do stranice za lokaciju
+                        navController.navigate("location_service")
                     },
                     modifier = Modifier
                         .weight(1f)
@@ -271,7 +304,6 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
                     )
                 }
             }
-
         }
     }
 }
@@ -281,20 +313,19 @@ fun MarkerNameDialog(
     markerName: MutableState<TextFieldValue>,
     onDismiss: () -> Unit,
     onConfirm: () -> Unit,
-    onOpen: () -> Unit // Dodata funkcija koja se poziva pri otvaranju dijaloga
+    onOpen: () -> Unit // Funkcija za resetovanje unosa
 ) {
     LaunchedEffect(Unit) {
-        onOpen() // Resetovanje unosa prilikom otvaranja dijaloga
+        onOpen()
     }
-
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(text = "Marker Name") },
+        title = { Text(text = "Enter Marker Name") },
         text = {
             TextField(
                 value = markerName.value,
-                onValueChange = { newText -> markerName.value = newText },
-                placeholder = { Text("Enter marker name") }
+                onValueChange = { markerName.value = it },
+                label = { Text("Marker Name") }
             )
         },
         confirmButton = {
