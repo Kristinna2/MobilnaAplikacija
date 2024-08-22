@@ -265,7 +265,11 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
 
                 Button(
                     onClick = {
-                        navController.navigate("event_details")
+                        val location = currentLocation.value
+                        if (location != null) {
+                            navController.currentBackStackEntry?.savedStateHandle?.set("location", location)
+                            navController.navigate("event_details")
+                        }
                     },
                     modifier = Modifier
                         .weight(1f)

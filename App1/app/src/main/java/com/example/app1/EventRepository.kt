@@ -1,5 +1,8 @@
 package com.example.app1
 
+import android.net.Uri
+import com.google.android.gms.maps.model.LatLng
+
 
 interface EventRepository {
 
@@ -7,11 +10,11 @@ interface EventRepository {
     suspend fun saveEventData(
         description: String,
         crowd: Int,
-       // mainImage: Uri,
+        mainImage: Uri,
         eventName: String,
         eventType: String,
-        //galleryImages: List<Uri>,
-       // location: LatLng
+        galleryImages: List<Uri>,
+       location: LatLng
     ): Resource<String>
 
     suspend fun getUserEvent(

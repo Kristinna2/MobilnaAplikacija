@@ -12,8 +12,6 @@ data class Event(
     val description: String? = null, // Nullable, as it won't be used for Natural Disasters
     val crowdLevel: Int? = null, // Nullable, as it won't be used for Natural Disasters
     val mainImage: String? = null, // Nullable, as the image might not be selected
-
-
-val galleryImages: List<String> = emptyList(),
+        val galleryImages: List<String> = emptyList(),
     val location: GeoPoint = GeoPoint(0.0, 0.0)
 )

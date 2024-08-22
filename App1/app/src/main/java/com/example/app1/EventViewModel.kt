@@ -1,9 +1,11 @@
 package com.example.app1
 
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -38,23 +40,23 @@ class EventViewModel: ViewModel() {
     fun saveEventData(
         description: String,
         crowd: Int,
-       // mainImage: Uri,
+        mainImage: Uri,
         eventName: String,
         eventType: String,
-      //  galleryImages: List<Uri>,
-      //  location: MutableState<LatLng?>
+        galleryImages: List<Uri>,
+        location: LatLng?
     ) = viewModelScope.launch{
         _eventFlow.value = Resource.Loading
         repository.saveEventData(
             description = description,
             crowd = crowd,
-           // mainImage = mainImage,
+            mainImage = mainImage,
             eventName=eventName,
-            eventType=eventType
-          //  galleryImages = galleryImages,
-           // location = location.value!!
+            eventType=eventType,
+            galleryImages = galleryImages,
+           location = location!!
         )
-        _eventFlow.value = Resource.Success("Uspešno dodata plaža")
+        _eventFlow.value = Resource.Success("Uspešno dodat dogadjaj")
     }
 
 

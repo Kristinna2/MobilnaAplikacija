@@ -15,12 +15,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -40,10 +43,14 @@ import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.app1.EventViewModel
 import com.example.app1.Resource
+import com.google.android.gms.maps.model.LatLng
 
 @Composable
 fun EventDetailsPage(navController: NavController) {
     val eventViewModel: EventViewModel = viewModel()
+  //  val location: MutableState<LatLng?>
+
+
     val eventTypes = listOf("Concert", "Sports Event", "Manifestation", "Natural Disaster")
     var selectedEventType by remember { mutableStateOf("") }
     val eventName = remember { mutableStateOf(TextFieldValue("")) }
@@ -53,6 +60,7 @@ fun EventDetailsPage(navController: NavController) {
     val buttonIsLoading = remember { mutableStateOf(false) }
     val showedAlert = remember { mutableStateOf(false) }
     val eventFlow = eventViewModel?.eventFlow?.collectAsState(initial = null)?.value
+    var galleryImages by remember { mutableStateOf<List<Uri>>(emptyList()) }
 
     // Photo picker launcher
     val launcher = rememberLauncherForActivityResult(
@@ -60,12 +68,27 @@ fun EventDetailsPage(navController: NavController) {
     ) { uri: Uri? ->
         imageUri = uri
     }
+    val location = remember { mutableStateOf<LatLng?>(null) }
+    val savedStateHandle = navController.previousBackStackEntry?.savedStateHandle
+
+    // Preuzimanje vrednosti iz SavedStateHandle-a
+    LaunchedEffect(Unit) {
+        val receivedLocation = savedStateHandle?.get<LatLng>("location")
+        location.value = receivedLocation
+    }
+    val scrollState = rememberScrollState()
 
     Column(
         modifier = Modifier
-            .fillMaxSize()
+            .verticalScroll(scrollState)
             .padding(16.dp)
     ) {
+        Button(
+            onClick = { navController.navigateUp() }, // Navigira unazad
+            modifier = Modifier.padding(bottom = 16.dp).align(Alignment.Start)
+        ) {
+            Text(text = "Back")
+        }
         Text(
             text = "Event Details",
             fontSize = 24.sp,
@@ -151,7 +174,7 @@ fun EventDetailsPage(navController: NavController) {
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
         // Submit Button
         Button(
@@ -163,6 +186,9 @@ fun EventDetailsPage(navController: NavController) {
                     eventType = selectedEventType,
                     description = additionalDetails.value.text,
                     crowd = crowdLevel.value,
+                    mainImage = imageUri!!,
+                    galleryImages = emptyList(),
+                   location =location.value
 
                 )
             },
@@ -173,6 +199,9 @@ fun EventDetailsPage(navController: NavController) {
             } else {
                 Text(text = "Submit")
             }
+
+            Spacer(modifier = Modifier.height(8.dp)) // Opcionalno, ako želite dodatni razmak
+
         }
 
         eventFlow?.let {
