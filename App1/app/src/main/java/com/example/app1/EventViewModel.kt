@@ -2,6 +2,7 @@ package com.example.app1
 
 
 import android.net.Uri
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -12,7 +13,11 @@ import kotlinx.coroutines.launch
 
 class EventViewModel: ViewModel() {
     val repository = EventRepositoryImplementation()
+    var eventData = mutableStateOf<Event?>(null)
 
+    fun setEventData(event: Event) {
+        eventData.value = event
+    }
     private val _eventFlow = MutableStateFlow<Resource<String>?>(null)
     val eventFlow: StateFlow<Resource<String>?> = _eventFlow
 

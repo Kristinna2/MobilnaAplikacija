@@ -2,13 +2,11 @@ package com.example.app1
 
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.google.android.gms.maps.model.LatLng
+import pages.DetailsPage
 import pages.EventDetailsPage
 import pages.HomePage
 import pages.LocationServicePage
@@ -21,7 +19,7 @@ import pages.UsersPage
 fun MyAppNavigation(modifier: Modifier = Modifier,authViewModel: AuthViewModel) {
     val navController = rememberNavController()
     //val location = remember { mutableStateOf<LatLng?>(null) }  // Koristimo remember za pamćenje lokacije
-
+   // val homeViewModel: HomeViewModel = viewModel()
     NavHost(navController = navController, startDestination = "login", builder = {
         composable("login"){
             LoginPage(modifier,navController,authViewModel)
@@ -44,6 +42,11 @@ fun MyAppNavigation(modifier: Modifier = Modifier,authViewModel: AuthViewModel) 
         composable("event_details") {
             EventDetailsPage(navController = navController)
         }
+        composable("details") {
+           DetailsPage(navController = navController)
+        }
+
+
 
     })
 

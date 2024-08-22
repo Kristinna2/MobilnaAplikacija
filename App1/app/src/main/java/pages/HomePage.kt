@@ -1,6 +1,7 @@
 package pages
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.pm.PackageManager
 import android.util.Log
 import androidx.compose.foundation.background
@@ -29,9 +30,9 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -44,18 +45,76 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.app1.AuthState
 import com.example.app1.AuthViewModel
+import com.example.app1.EventViewModel
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.google.common.reflect.TypeToken
+import com.google.gson.Gson
+import com.google.maps.android.compose.Circle
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+
+// Data class for markers
+data class MarkerData(val latitude: Double, val longitude: Double, val name: String)
+
+private const val PREFS_NAME = "app_prefs"
+private const val MARKERS_KEY = "markers_key"
+
+// Save markers to SharedPreferences
+fun saveMarkers(context: Context, markers: List<MarkerData>) {
+    val gson = Gson()
+    val json = gson.toJson(markers)
+    context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit()
+        .putString(MARKERS_KEY, json)
+        .apply()
+}
+
+// Load markers from SharedPreferences
+fun loadMarkers(context: Context): List<MarkerData> {
+    val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    val gson = Gson()
+    val json = prefs.getString(MARKERS_KEY, "[]") ?: "[]"
+    val type = object : TypeToken<List<MarkerData>>() {}.type
+    return gson.fromJson(json, type)
+}
+
+class HomeViewModel(private val context: Context) : ViewModel() {
+    private val _markers = MutableStateFlow<List<MarkerData>>(emptyList())
+    val markers: StateFlow<List<MarkerData>> = _markers
+
+    init {
+        loadMarkers()
+    }
+
+    fun addMarker(latitude: Double, longitude: Double, name: String) {
+        val newMarker = MarkerData(latitude, longitude, name)
+        val updatedMarkers = _markers.value + newMarker
+        _markers.value = updatedMarkers
+        saveMarkers(context, updatedMarkers)
+    }
+
+    private fun loadMarkers() {
+        _markers.value = loadMarkers(context)
+    }
+
+    fun clearMarkers() {
+        _markers.value = emptyList()
+        saveMarkers(context, _markers.value)
+    }
+}
 
 @SuppressLint("MissingPermission")
 @Composable
@@ -63,6 +122,10 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
 
     val context = LocalContext.current
     val authState = authViewModel.authState.observeAsState()
+    val eventViewModel: EventViewModel = viewModel()
+    val homeViewModel: HomeViewModel = viewModel(
+        factory = HomeViewModelFactory(context)
+    )
 
     val currentLocation = remember { mutableStateOf<LatLng?>(null) }
     val fusedLocationClient: FusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context)
@@ -72,6 +135,18 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
         fastestInterval = 5000
         priority = com.google.android.gms.location.LocationRequest.PRIORITY_HIGH_ACCURACY
     }
+
+    // Handle new markers
+    LaunchedEffect(Unit) {
+        navController.currentBackStackEntry?.savedStateHandle?.getLiveData<Pair<LatLng, String>>("newMarker")
+            ?.observeForever { newMarker ->
+                newMarker?.let {
+                    homeViewModel.addMarker(it.first.latitude, it.first.longitude, it.second) // Add marker to ViewModel
+                }
+            }
+    }
+
+    val markers by homeViewModel.markers.collectAsState(initial = emptyList())
 
     LaunchedEffect(Unit) {
         if (ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
@@ -106,7 +181,7 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
         }
     }
 
-    val markers = remember { mutableStateListOf<Pair<LatLng, String>>() }
+  //  val markers = remember { mutableStateListOf<Pair<LatLng, String>>() }
     var selectedMarker by remember { mutableStateOf<LatLng?>(null) }
     var showDialog by remember { mutableStateOf(false) }
     val markerName = remember { mutableStateOf(TextFieldValue("")) }
@@ -124,7 +199,9 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
             markerName = markerName,
             onDismiss = { showDialog = false },
             onConfirm = {
-                markers.add(Pair(selectedMarker!!, markerName.value.text))
+                selectedMarker?.let {
+                    homeViewModel.addMarker(it.latitude, it.longitude, markerName.value.text)
+                }
                 showDialog = false
             },
             onOpen = {
@@ -215,20 +292,35 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
                 }
             ) {
                 currentLocation.value?.let {
+                    Circle(
+                        center = it,
+                        radius = 50.0, // Promenite veličinu po potrebi
+                        fillColor = Color.Blue.copy(alpha = 0.5f), // Boja kružića
+                        strokeColor = Color.Blue,
+                        strokeWidth = 2f
+                    )
                     Marker(
                         state = MarkerState(position = it),
                         title = "My Location",
                         icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)
                     )
                 }
-                markers.forEach { (location, name) ->
+                markers.forEach { marker ->
                     Marker(
-                        state = MarkerState(position = location),
-                        title = name,
-                        onInfoWindowClick = {
-                            Log.d("HomePage", "Clicked on marker: $name")
-                            markers.remove(Pair(location, name))
+                        state = MarkerState(position = LatLng(marker.latitude, marker.longitude)),
+                        title = marker.name,
+                        icon = if (selectedColor == null || selectedColor == Color.Red) {
+                            BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)
+                        } else {
+                            BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)
+                        },
+                                onClick = {
+                            val markerJson = Gson().toJson(marker)
+                            navController.currentBackStackEntry?.savedStateHandle?.set("markerData", markerJson)
+                            navController.navigate("details")
+                            true
                         }
+
                     )
                 }
             }
@@ -343,4 +435,18 @@ fun MarkerNameDialog(
             }
         }
     )
+}
+
+
+
+
+
+class HomeViewModelFactory(private val context: Context) : ViewModelProvider.Factory {
+    @Suppress("UNCHECKED_CAST")
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(HomeViewModel::class.java)) {
+            return HomeViewModel(context) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
+    }
 }

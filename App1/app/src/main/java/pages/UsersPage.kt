@@ -52,8 +52,10 @@ fun UsersPage(
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // LazyColumn already enables scrolling
         LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.weight(1f) // Allows the LazyColumn to take available space
         ) {
             items(usersState.value) { user ->
                 UserItem(user)
@@ -62,7 +64,7 @@ fun UsersPage(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Add a Back button that navigates to the HomePage
+        // Back button to navigate to HomePage
         Button(
             onClick = { navController.navigate("home") },
             shape = CircleShape,
@@ -75,7 +77,6 @@ fun UsersPage(
         }
     }
 }
-
 
 @Composable
 fun UserItem(user: User) {

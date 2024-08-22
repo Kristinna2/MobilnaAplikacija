@@ -1,3 +1,4 @@
+
 package pages
 
 import android.net.Uri
@@ -48,7 +49,7 @@ import com.google.android.gms.maps.model.LatLng
 @Composable
 fun EventDetailsPage(navController: NavController) {
     val eventViewModel: EventViewModel = viewModel()
-  //  val location: MutableState<LatLng?>
+    //  val location: MutableState<LatLng?>
 
 
     val eventTypes = listOf("Concert", "Sports Event", "Manifestation", "Natural Disaster")
@@ -61,6 +62,7 @@ fun EventDetailsPage(navController: NavController) {
     val showedAlert = remember { mutableStateOf(false) }
     val eventFlow = eventViewModel?.eventFlow?.collectAsState(initial = null)?.value
     var galleryImages by remember { mutableStateOf<List<Uri>>(emptyList()) }
+
 
     // Photo picker launcher
     val launcher = rememberLauncherForActivityResult(
@@ -188,9 +190,14 @@ fun EventDetailsPage(navController: NavController) {
                     crowd = crowdLevel.value,
                     mainImage = imageUri!!,
                     galleryImages = emptyList(),
-                   location =location.value
+                    location =location.value
 
                 )
+                navController.previousBackStackEntry?.savedStateHandle?.set(
+                    "newMarker",
+                    Pair(location.value!!, eventName.value.text)
+                )
+                navController.navigateUp() // Navigate back
             },
             modifier = Modifier.align(Alignment.End)
         ) {
