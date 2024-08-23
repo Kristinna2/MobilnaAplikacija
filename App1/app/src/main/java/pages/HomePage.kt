@@ -194,6 +194,9 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
     // Filter buttons state
     var selectedColor by remember { mutableStateOf<Color?>(null) }
 
+    var isFilterButtonPressed by remember { mutableStateOf(false) }
+
+
     if (showDialog) {
         MarkerNameDialog(
             markerName = markerName,
@@ -287,8 +290,10 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
                 modifier = Modifier.fillMaxSize(),
                 cameraPositionState = cameraPositionState,
                 onMapClick = { latLng ->
-                    selectedMarker = latLng
-                    showDialog = true
+                    if (!isFilterButtonPressed) {
+                        selectedMarker = latLng
+                        showDialog = true
+                    }
                 }
             ) {
                 currentLocation.value?.let {
@@ -337,8 +342,10 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
             ) {
                 Button(
                     onClick = {
-                        // Dodaj akciju za dugme "Filter"
+                        isFilterButtonPressed = true
+                        showDialog = true
                     },
+
                     modifier = Modifier
                         .weight(1f)
                         .padding(end = 8.dp) // Razmak između dugmadi
@@ -354,7 +361,9 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
                         color = Color.White
                     )
                 }
-
+                if (showDialog) {
+                    EventFilterDialog(onDismiss = { showDialog = false }, eventViewModel = viewModel(), usersViewModel = viewModel())
+                }
                 Button(
                     onClick = {
                         val location = currentLocation.value

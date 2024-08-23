@@ -3,6 +3,7 @@ package com.example.app1
 
 
 import android.net.Uri
+import android.util.Log
 import com.example.aquaspot.model.service.StorageService
 import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.auth.FirebaseAuth
@@ -24,6 +25,8 @@ class EventRepositoryImplementation : EventRepository {
         return try{
             val snapshot = firestoreInstance.collection("events").get().await()
             val events = snapshot.toObjects(Event::class.java)
+            Log.d("EventRepository", "Učitani događaji: $events")
+
             Resource.Success(events)
         }catch (e: Exception){
             e.printStackTrace()

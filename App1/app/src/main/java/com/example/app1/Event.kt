@@ -14,4 +14,16 @@ data class Event(
     val mainImage: String? = null, // Nullable, as the image might not be selected
         val galleryImages: List<String> = emptyList(),
     val location: GeoPoint = GeoPoint(0.0, 0.0)
-)
+){
+    constructor() : this(
+        id = "",
+        userId = "",
+        eventName = "",
+        eventType = "",
+        description = null,
+        crowdLevel = null,
+        mainImage = null,
+        galleryImages = emptyList(),
+        location = GeoPoint(0.0, 0.0)
+    )
+}

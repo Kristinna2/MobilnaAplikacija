@@ -15,9 +15,7 @@ class EventViewModel: ViewModel() {
     val repository = EventRepositoryImplementation()
     var eventData = mutableStateOf<Event?>(null)
 
-    fun setEventData(event: Event) {
-        eventData.value = event
-    }
+
     private val _eventFlow = MutableStateFlow<Resource<String>?>(null)
     val eventFlow: StateFlow<Resource<String>?> = _eventFlow
 
@@ -42,6 +40,12 @@ class EventViewModel: ViewModel() {
         _events.value = repository.getAllEvents()
     }
 
+
+    fun setEventData(marker: Event) {
+        eventData.value = marker
+    }
+
+
     fun saveEventData(
         description: String,
         crowd: Int,
@@ -63,8 +67,26 @@ class EventViewModel: ViewModel() {
         )
         _eventFlow.value = Resource.Success("Uspešno dodat dogadjaj")
     }
+   /* fun loadEventData(markerJson: String) {
+        val marker = Gson().fromJson(markerJson, Event::class.java)
+        Log.d("EventViewModel", "Loaded event: $marker")
+        setEventData(marker)
+    }*/
+   /* private val eventRepository = EventRepositoryImplementation()
+    private val _eventData = MutableStateFlow<Event?>(null)
 
-
+    // Metoda za učitavanje svih događaja
+    suspend fun loadAllEvents() {
+        when (val resource = eventRepository.getAllEvents()) {
+            is Resource.Success -> {
+                _eventData.value = resource.data?.firstOrNull() // Uzimamo prvi događaj kao primer
+            }
+            is Resource.Failure -> {
+                Log.e("EventViewModel", "Greška pri učitavanju događaja: ${resource.exception}")
+            }
+        }
+    }
+*/
     /*fun getBeachAllRates(
         bid: String
     ) = viewModelScope.launch {

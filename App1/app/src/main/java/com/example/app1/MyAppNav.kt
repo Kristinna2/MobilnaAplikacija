@@ -6,7 +6,6 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import pages.DetailsPage
 import pages.EventDetailsPage
 import pages.HomePage
 import pages.LocationServicePage
@@ -42,9 +41,9 @@ fun MyAppNavigation(modifier: Modifier = Modifier,authViewModel: AuthViewModel) 
         composable("event_details") {
             EventDetailsPage(navController = navController)
         }
-        composable("details") {
+       /* composable("details") {
            DetailsPage(navController = navController)
-        }
+        }*/
 
 
 

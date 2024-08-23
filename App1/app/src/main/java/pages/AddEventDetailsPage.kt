@@ -78,6 +78,9 @@ fun EventDetailsPage(navController: NavController) {
         val receivedLocation = savedStateHandle?.get<LatLng>("location")
         location.value = receivedLocation
     }
+
+
+
     val scrollState = rememberScrollState()
 
     Column(
