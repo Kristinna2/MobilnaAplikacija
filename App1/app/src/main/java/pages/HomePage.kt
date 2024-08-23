@@ -126,6 +126,7 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
     val homeViewModel: HomeViewModel = viewModel(
         factory = HomeViewModelFactory(context)
     )
+    var newMarker by remember { mutableStateOf<Pair<LatLng, String>?>(null) }
 
     val currentLocation = remember { mutableStateOf<LatLng?>(null) }
     val fusedLocationClient: FusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context)
@@ -136,14 +137,13 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
         priority = com.google.android.gms.location.LocationRequest.PRIORITY_HIGH_ACCURACY
     }
 
+    val savedStateHandle = navController.currentBackStackEntry?.savedStateHandle
+
     // Handle new markers
-    LaunchedEffect(Unit) {
-        navController.currentBackStackEntry?.savedStateHandle?.getLiveData<Pair<LatLng, String>>("newMarker")
-            ?.observeForever { newMarker ->
-                newMarker?.let {
-                    homeViewModel.addMarker(it.first.latitude, it.first.longitude, it.second) // Add marker to ViewModel
-                }
-            }
+    LaunchedEffect(savedStateHandle) {
+        savedStateHandle?.getLiveData<Pair<LatLng, String>>("newMarker")?.observeForever {
+            newMarker = it
+        }
     }
 
     val markers by homeViewModel.markers.collectAsState(initial = emptyList())
@@ -183,7 +183,6 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
 
   //  val markers = remember { mutableStateListOf<Pair<LatLng, String>>() }
     var selectedMarker by remember { mutableStateOf<LatLng?>(null) }
-    var showDialog by remember { mutableStateOf(false) }
     val markerName = remember { mutableStateOf(TextFieldValue("")) }
 
     var expanded by remember { mutableStateOf(false) }
@@ -193,8 +192,10 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
 
     // Filter buttons state
     var selectedColor by remember { mutableStateOf<Color?>(null) }
+    var showDialog by remember { mutableStateOf(false) }
 
     var isFilterButtonPressed by remember { mutableStateOf(false) }
+    var isMarkerButtonPressed by remember { mutableStateOf(false) }
 
 
     if (showDialog) {
@@ -292,7 +293,11 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
                 onMapClick = { latLng ->
                     if (!isFilterButtonPressed) {
                         selectedMarker = latLng
-                        showDialog = true
+                        showDialog=true
+                        isMarkerButtonPressed = true
+                    }
+                    else{
+                        isMarkerButtonPressed=false
                     }
                 }
             ) {
@@ -320,9 +325,11 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
                             BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)
                         },
                                 onClick = {
-                            val markerJson = Gson().toJson(marker)
-                            navController.currentBackStackEntry?.savedStateHandle?.set("markerData", markerJson)
-                            navController.navigate("details")
+                                    it.showInfoWindow()
+
+                                    val markerJson = Gson().toJson(marker)
+                          navController.currentBackStackEntry?.savedStateHandle?.set("markerData", markerJson)
+                          //  navController.navigate("details")
                             true
                         }
 
@@ -342,8 +349,10 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
             ) {
                 Button(
                     onClick = {
-                        isFilterButtonPressed = true
-                        showDialog = true
+                        if(!isMarkerButtonPressed) {
+                            isFilterButtonPressed = true
+                            showDialog = true
+                        }
                     },
 
                     modifier = Modifier
@@ -362,7 +371,13 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
                     )
                 }
                 if (showDialog) {
-                    EventFilterDialog(onDismiss = { showDialog = false }, eventViewModel = viewModel(), usersViewModel = viewModel())
+                    if (!isMarkerButtonPressed) {
+                        EventFilterDialog(
+                            onDismiss = { showDialog = false },
+                            eventViewModel = viewModel(),
+                            usersViewModel = viewModel()
+                        )
+                    }
                 }
                 Button(
                     onClick = {

@@ -32,6 +32,8 @@ class EventViewModel: ViewModel() {
     private val _userEvents = MutableStateFlow<Resource<List<Event>>>(Resource.Success(emptyList()))
     val userEvents: StateFlow<Resource<List<Event>>> get() = _userEvents
 
+
+
     init {
         getAllEvents()
     }
@@ -39,6 +41,7 @@ class EventViewModel: ViewModel() {
     fun getAllEvents() = viewModelScope.launch {
         _events.value = repository.getAllEvents()
     }
+
 
 
     fun setEventData(marker: Event) {
@@ -67,6 +70,8 @@ class EventViewModel: ViewModel() {
         )
         _eventFlow.value = Resource.Success("Uspešno dodat dogadjaj")
     }
+
+
    /* fun loadEventData(markerJson: String) {
         val marker = Gson().fromJson(markerJson, Event::class.java)
         Log.d("EventViewModel", "Loaded event: $marker")
