@@ -57,6 +57,7 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.common.reflect.TypeToken
 import com.google.gson.Gson
 import com.google.maps.android.compose.Circle
@@ -137,13 +138,16 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
         priority = com.google.android.gms.location.LocationRequest.PRIORITY_HIGH_ACCURACY
     }
 
-    val savedStateHandle = navController.currentBackStackEntry?.savedStateHandle
+   // val savedStateHandle = navController.currentBackStackEntry?.savedStateHandle
 
     // Handle new markers
-    LaunchedEffect(savedStateHandle) {
-        savedStateHandle?.getLiveData<Pair<LatLng, String>>("newMarker")?.observeForever {
-            newMarker = it
-        }
+    LaunchedEffect(Unit) {
+        navController.currentBackStackEntry?.savedStateHandle?.getLiveData<Pair<LatLng, String>>("newMarker")
+            ?.observeForever { newMarker ->
+                newMarker?.let {
+                    homeViewModel.addMarker(it.first.latitude, it.first.longitude, it.second) // Add marker to ViewModel
+                }
+            }
     }
 
     val markers by homeViewModel.markers.collectAsState(initial = emptyList())
@@ -155,8 +159,9 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
                     super.onLocationResult(locationResult)
                     locationResult.locations.forEach { location ->
                         Log.d("HomePage", "Updated Location: ${location.latitude}, ${location.longitude}")
-                        currentLocation.value = LatLng(location.latitude, location.longitude)
-                    }
+                       currentLocation.value = LatLng(location.latitude, location.longitude)                    }
+                     //  currentLocation.value = LatLng(37.4200000, -122.1200000)}
+
                 }
             }, null)
         } else {
@@ -213,11 +218,19 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
             }
         )
     }
-
+    var selectedMapStyle by remember { mutableStateOf<MapStyleOptions?>(null) }
+    //selectedMapStyle = MapStyleOptions.loadRawResourceStyle(context, R.raw.map_style)
+    // Recenter Button State
+    val recenterMap = {
+        currentLocation.value?.let {
+            cameraPositionState.position = CameraPosition.fromLatLngZoom(it, 15f)
+        }
+    }
     Column(
         modifier = modifier
             .fillMaxSize()
             .background(Color(0xFFC9E2F3)) // Pozadina aplikacije na svetlu plavu boju
+
             .padding(16.dp)
     ) {
         // Raspored za naslov i ikonu
@@ -281,63 +294,75 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
             }
         }
 
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(8.dp)
-                .weight(1f) // Povećaj visinu mape
-        ) {
-            GoogleMap(
-                modifier = Modifier.fillMaxSize(),
-                cameraPositionState = cameraPositionState,
-                onMapClick = { latLng ->
-                    if (!isFilterButtonPressed) {
-                        selectedMarker = latLng
-                        showDialog=true
-                        isMarkerButtonPressed = true
-                    }
-                    else{
-                        isMarkerButtonPressed=false
-                    }
-                }
+
+            // Search bar
+
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(8.dp)
+                    .weight(1f) // Povećaj visinu mape
             ) {
-                currentLocation.value?.let {
-                    Circle(
-                        center = it,
-                        radius = 50.0, // Promenite veličinu po potrebi
-                        fillColor = Color.Blue.copy(alpha = 0.5f), // Boja kružića
-                        strokeColor = Color.Blue,
-                        strokeWidth = 2f
-                    )
-                    Marker(
-                        state = MarkerState(position = it),
-                        title = "My Location",
-                        icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)
-                    )
-                }
-                markers.forEach { marker ->
-                    Marker(
-                        state = MarkerState(position = LatLng(marker.latitude, marker.longitude)),
-                        title = marker.name,
-                        icon = if (selectedColor == null || selectedColor == Color.Red) {
-                            BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)
+
+                GoogleMap(
+                    modifier = Modifier.fillMaxSize(),
+                    cameraPositionState = cameraPositionState,
+                    onMapClick = { latLng ->
+                        if (!isFilterButtonPressed) {
+                            selectedMarker = latLng
+                            showDialog = true
+                            isMarkerButtonPressed = true
                         } else {
-                            BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)
-                        },
+                            isMarkerButtonPressed = false
+                        }
+                    }
+                ) {
+                    currentLocation.value?.let {
+                        Circle(
+                            center = it,
+                            radius = 50.0, // Promenite veličinu po potrebi
+                            fillColor = Color.Blue.copy(alpha = 0.5f), // Boja kružića
+                            strokeColor = Color.Blue,
+                            strokeWidth = 2f
+                        )
+                        Marker(
+                            state = MarkerState(position = it),
+                            title = "My Location",
+                            icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)
+                        )
+                    }
+                    markers.filter { it.name.contains(searchQuery.value.text, ignoreCase = true) }
+                        .forEach { marker ->
+                            Marker(
+                                state = MarkerState(
+                                    position = LatLng(
+                                        marker.latitude,
+                                        marker.longitude
+                                    )
+                                ),
+                                title = marker.name,
+                                icon = if (selectedColor == null || selectedColor == Color.Red) {
+                                    BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)
+                                } else {
+                                    BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)
+                                },
                                 onClick = {
                                     it.showInfoWindow()
 
                                     val markerJson = Gson().toJson(marker)
-                          navController.currentBackStackEntry?.savedStateHandle?.set("markerData", markerJson)
-                          //  navController.navigate("details")
-                            true
+                                    navController.currentBackStackEntry?.savedStateHandle?.set(
+                                        "markerData",
+                                        markerJson
+                                    )
+                                    //  navController.navigate("details")
+                                    true
+                                }
+
+                            )
                         }
-
-                    )
                 }
-            }
-        }
 
+        }
         Box(
             modifier = Modifier
                 .fillMaxWidth()
