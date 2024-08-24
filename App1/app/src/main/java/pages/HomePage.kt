@@ -52,70 +52,22 @@ import androidx.navigation.NavController
 import com.example.app1.AuthState
 import com.example.app1.AuthViewModel
 import com.example.app1.EventViewModel
+import com.example.app1.MarkerViewModel
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MapStyleOptions
-import com.google.common.reflect.TypeToken
 import com.google.gson.Gson
 import com.google.maps.android.compose.Circle
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 
 // Data class for markers
-data class MarkerData(val latitude: Double, val longitude: Double, val name: String)
 
-private const val PREFS_NAME = "app_prefs"
-private const val MARKERS_KEY = "markers_key"
-
-// Save markers to SharedPreferences
-fun saveMarkers(context: Context, markers: List<MarkerData>) {
-    val gson = Gson()
-    val json = gson.toJson(markers)
-    context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit()
-        .putString(MARKERS_KEY, json)
-        .apply()
-}
-
-// Load markers from SharedPreferences
-fun loadMarkers(context: Context): List<MarkerData> {
-    val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-    val gson = Gson()
-    val json = prefs.getString(MARKERS_KEY, "[]") ?: "[]"
-    val type = object : TypeToken<List<MarkerData>>() {}.type
-    return gson.fromJson(json, type)
-}
-
-class HomeViewModel(private val context: Context) : ViewModel() {
-    private val _markers = MutableStateFlow<List<MarkerData>>(emptyList())
-    val markers: StateFlow<List<MarkerData>> = _markers
-
-    init {
-        loadMarkers()
-    }
-
-    fun addMarker(latitude: Double, longitude: Double, name: String) {
-        val newMarker = MarkerData(latitude, longitude, name)
-        val updatedMarkers = _markers.value + newMarker
-        _markers.value = updatedMarkers
-        saveMarkers(context, updatedMarkers)
-    }
-
-    private fun loadMarkers() {
-        _markers.value = loadMarkers(context)
-    }
-
-    fun clearMarkers() {
-        _markers.value = emptyList()
-        saveMarkers(context, _markers.value)
-    }
-}
 
 @SuppressLint("MissingPermission")
 @Composable
@@ -124,8 +76,8 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
     val context = LocalContext.current
     val authState = authViewModel.authState.observeAsState()
     val eventViewModel: EventViewModel = viewModel()
-    val homeViewModel: HomeViewModel = viewModel(
-        factory = HomeViewModelFactory(context)
+    val markerViewModel: MarkerViewModel = viewModel(
+        factory = MarkerViewModelFactory(context)
     )
     var newMarker by remember { mutableStateOf<Pair<LatLng, String>?>(null) }
 
@@ -145,12 +97,13 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
         navController.currentBackStackEntry?.savedStateHandle?.getLiveData<Pair<LatLng, String>>("newMarker")
             ?.observeForever { newMarker ->
                 newMarker?.let {
-                    homeViewModel.addMarker(it.first.latitude, it.first.longitude, it.second) // Add marker to ViewModel
+                    markerViewModel.addMarker(it.first.latitude, it.first.longitude, it.second) // Add marker to ViewModel
                 }
             }
     }
 
-    val markers by homeViewModel.markers.collectAsState(initial = emptyList())
+   // val markers by homeViewModel.markers.collectAsState(initial = emptyList())
+    val markers by markerViewModel.markers.collectAsState()
 
     LaunchedEffect(Unit) {
         if (ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
@@ -159,8 +112,8 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
                     super.onLocationResult(locationResult)
                     locationResult.locations.forEach { location ->
                         Log.d("HomePage", "Updated Location: ${location.latitude}, ${location.longitude}")
-                       currentLocation.value = LatLng(location.latitude, location.longitude)                    }
-                     //  currentLocation.value = LatLng(37.4200000, -122.1200000)}
+                      currentLocation.value = LatLng(location.latitude, location.longitude)                    }
+                       //currentLocation.value = LatLng(37.4200000, -122.1400000)}
 
                 }
             }, null)
@@ -200,7 +153,7 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
     var showDialog by remember { mutableStateOf(false) }
 
     var isFilterButtonPressed by remember { mutableStateOf(false) }
-    var isMarkerButtonPressed by remember { mutableStateOf(false) }
+ //   var isMarkerButtonPressed by remember { mutableStateOf(false) }
 
 
     if (showDialog) {
@@ -209,7 +162,7 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
             onDismiss = { showDialog = false },
             onConfirm = {
                 selectedMarker?.let {
-                    homeViewModel.addMarker(it.latitude, it.longitude, markerName.value.text)
+                    markerViewModel.addMarker(it.latitude, it.longitude, markerName.value.text)
                 }
                 showDialog = false
             },
@@ -311,9 +264,7 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
                         if (!isFilterButtonPressed) {
                             selectedMarker = latLng
                             showDialog = true
-                            isMarkerButtonPressed = true
-                        } else {
-                            isMarkerButtonPressed = false
+
                         }
                     }
                 ) {
@@ -331,16 +282,16 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
                             icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)
                         )
                     }
-                    markers.filter { it.name.contains(searchQuery.value.text, ignoreCase = true) }
+                    markers.filter { it.eventName.contains(searchQuery.value.text, ignoreCase = true) }
                         .forEach { marker ->
                             Marker(
                                 state = MarkerState(
                                     position = LatLng(
-                                        marker.latitude,
-                                        marker.longitude
+                                        marker.location.latitude,
+                                        marker.location.longitude
                                     )
                                 ),
-                                title = marker.name,
+                                title = marker.eventName,
                                 icon = if (selectedColor == null || selectedColor == Color.Red) {
                                     BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)
                                 } else {
@@ -354,7 +305,7 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
                                         "markerData",
                                         markerJson
                                     )
-                                    //  navController.navigate("details")
+                                      navController.navigate("details")
                                     true
                                 }
 
@@ -374,10 +325,10 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
             ) {
                 Button(
                     onClick = {
-                        if(!isMarkerButtonPressed) {
+
                             isFilterButtonPressed = true
                             showDialog = true
-                        }
+
                     },
 
                     modifier = Modifier
@@ -396,13 +347,13 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
                     )
                 }
                 if (showDialog) {
-                    if (!isMarkerButtonPressed) {
+
                         EventFilterDialog(
                             onDismiss = { showDialog = false },
-                            eventViewModel = viewModel(),
+                            eventViewModel,
                             usersViewModel = viewModel()
                         )
-                    }
+
                 }
                 Button(
                     onClick = {
@@ -490,11 +441,11 @@ fun MarkerNameDialog(
 
 
 
-class HomeViewModelFactory(private val context: Context) : ViewModelProvider.Factory {
+class MarkerViewModelFactory(private val context: Context) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(HomeViewModel::class.java)) {
-            return HomeViewModel(context) as T
+        if (modelClass.isAssignableFrom(MarkerViewModel::class.java)) {
+            return MarkerViewModel(context) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

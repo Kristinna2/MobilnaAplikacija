@@ -24,8 +24,7 @@ import com.example.app1.EventViewModel
 import com.example.app1.Resource
 import com.example.app1.User
 import com.example.app1.UsersViewModel
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
+
 
 @Composable
 fun EventFilterDialog(
@@ -115,7 +114,7 @@ fun EventFilterDialog(
                     expanded = isEventNameDropdownExpanded,
                     onDismissRequest = { isEventNameDropdownExpanded = false }
                 ) {
-                    eventsState.forEach { event ->
+                    eventsState.forEach { event:Event ->
                         DropdownMenuItem(
                             onClick = {
                                 ChooseEventName = event.eventName // Pretpostavljamo da event ima naziv

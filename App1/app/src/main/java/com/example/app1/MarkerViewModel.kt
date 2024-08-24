@@ -56,12 +56,21 @@ class MarkerViewModel(private val context: Context) : ViewModel() {
 
                 if (snapshots != null) {
                     val markerList = snapshots.mapNotNull { doc ->
-                        doc.toObject(Marker::class.java).copy(userId = doc.id)
+                        // Pretvori dokument u Marker klasu
+                        val marker = doc.toObject(Marker::class.java).copy(userId = doc.id)
+
+                        // Proveri da li marker ima važne vrednosti, kao što su eventName i location
+                        if (marker.eventName.isNotEmpty() && marker.location != GeoPoint(0.0, 0.0)) {
+                            marker
+                        } else {
+                            null // Ako su vrednosti prazne, vrati null
+                        }
                     }
                     _markers.value = markerList
                 }
             }
     }
+
 
 
     override fun onCleared() {

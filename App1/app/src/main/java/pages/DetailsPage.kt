@@ -1,84 +1,166 @@
 package pages
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
+import com.example.app1.EventViewModel
+import com.example.app1.EventViewModelFactory
+import com.example.app1.Marker
+import com.google.gson.Gson
 
-
-//import data.MarkerData
-/*
 @Composable
-fun DetailsPage(navController: NavController) {
-    val eventViewModel: EventViewModel = viewModel()
+fun DetailsPage(
+    navController: NavController,
+    eventViewModel: EventViewModel = viewModel(factory = EventViewModelFactory())
+) {
+    val markerDataJson = navController.previousBackStackEntry
+        ?.savedStateHandle
+        ?.get<String>("markerData")
 
-    // Učitavanje događaja
-    LaunchedEffect(Unit) {
-        eventViewModel.loadAllEvents()
-    }
+    val markerData = Gson().fromJson(markerDataJson, Marker::class.java)
+   // val event by eventViewModel.events.collectAsState()
 
-    val eventData by eventViewModel.eventData.collectAsState()
 
-    Column(modifier = Modifier.padding(16.dp)) {
-        eventData?.let { event ->
-            Text(
-                text = "Naziv događaja: ${event.eventName}",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold
-            )
+    LaunchedEffect(markerData) {
+        markerData?.let {
 
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(text = "Opis: ${event.description}", fontSize = 16.sp)
-
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(text = "Tip događaja: ${event.eventType}", fontSize = 16.sp)
-
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(text = "Nivo gužve: ${event.crowdLevel}", fontSize = 16.sp)
-
-            event.location?.let { location ->
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "Lokacija: ${location.latitude}, ${location.longitude}",
-                    fontSize = 16.sp
-                )
-            }
-
-            event.mainImage?.let { uri ->
-                if (uri.isNotEmpty()) {
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Image(
-                        painter = rememberImagePainter(uri),
-                        contentDescription = "Glavna slika događaja",
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(200.dp)
-                    )
-                } else {
-                    // Prikaz podrazumevane slike
-                    Image(
-                        painter = rememberImagePainter("URL_TO_DEFAULT_IMAGE"),
-                        contentDescription = "Podrazumevana slika događaja",
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(200.dp)
-                    )
-                }
-            }
-
-          /*  event.galleryImages?.let { images ->
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(text = "Galerija slika:", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                LazyRow {
-                    items(images) { imageUri ->
-                        Image(
-                            painter = rememberImagePainter(imageUri),
-                            contentDescription = "Slika iz galerije",
-                            modifier = Modifier
-                                .size(100.dp)
-                                .padding(4.dp)
-                        )
-                    }
-                }
-            }*/
-        } ?: run {
-            Text(text = "Podaci nisu dostupni.", fontSize = 16.sp)
         }
     }
-}*/
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFFBCE6F6))
+            .padding(16.dp)
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Button(
+            onClick = { navController.navigateUp() },
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF75553))
+        ) {
+            Text(text = "Back", color = Color.White)
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        markerData?.let { marker ->
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(8.dp)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = marker.eventName,
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFFF75553),
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+
+                    InfoBox(label = "User ID", value = marker.userId)
+                    InfoBox(label = "Event Type", value = marker.eventType)
+                    InfoBox(label = "Description", value = marker.description)
+                    InfoBox(label = "Crowd Level", value = marker.crowd.toString())
+
+                    if (marker.mainImage.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        AsyncImage(
+                            model = ImageRequest.Builder(LocalContext.current)
+                                .data(marker.mainImage)
+                                .crossfade(true)
+                                .build(),
+                            contentDescription = "Main Image",
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(200.dp)
+                                .background(Color.Gray)
+                        )
+                    }
+
+
+                    if (marker.galleryImages.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = "Gallery Images:",
+                            color = Color.Black,
+                            fontSize = 18.sp,
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        )
+                        marker.galleryImages.forEach { imageUrl ->
+                            Spacer(modifier = Modifier.height(8.dp))
+                            AsyncImage(
+                                model = ImageRequest.Builder(LocalContext.current)
+                                    .data(imageUrl)
+                                    .crossfade(true)
+                                    .build(),
+                                contentDescription = "Gallery Image",
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(200.dp)
+                                    .background(Color.Gray)
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+                    InfoBox(label = "Latitude", value = marker.location.latitude.toString())
+                    InfoBox(label = "Longitude", value = marker.location.longitude.toString())
+                }
+            }
+        } ?: run {
+            Text(
+                text = "No event data available",
+                color = Color.Red,
+                fontSize = 16.sp
+            )
+        }
+    }
+}
+
+@Composable
+fun InfoBox(label: String, value: String) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp)
+            .background(Color(0xFFF1F1F1))
+            .padding(8.dp)
+    ) {
+        Text(
+            text = "$label: $value",
+            color = Color.Black,
+            fontSize = 16.sp
+        )
+    }
+}

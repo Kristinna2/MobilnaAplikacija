@@ -11,7 +11,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
+
 class EventViewModel: ViewModel() {
+
+
     val repository = EventRepositoryImplementation()
     var eventData = mutableStateOf<Event?>(null)
 
