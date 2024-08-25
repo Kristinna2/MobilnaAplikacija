@@ -156,13 +156,7 @@ fun EventFilterDialog(
 
 
                 TextButton(onClick = { isCrowdLevelDropdownExpanded = !isCrowdLevelDropdownExpanded }) {
-                    val crowdLevelText = if (selectedCrowdLevel != null) {
-                        selectedCrowdLevel.toString() // Prikazivanje samo odabranog nivoa gužve
-                    } else {
-                        "Select Crowd Level" // Prikazivanje teksta ako nivo nije odabran
-                    }
-
-                    Text(crowdLevelText)
+                    Text("Crowd Level: $selectedCrowdLevel")
                 }
 
                 DropdownMenu(
@@ -183,7 +177,17 @@ fun EventFilterDialog(
         },
         confirmButton = {
             TextButton(onClick = {
-                markerViewModel.filterMarkers(Category,ChooseEventName,selectedCrowdLevel)
+               // val selectedUserName = ChooseUser?.let { "${it.firstName} ${it.lastName}" } ?: "No User Selected"
+              //  Log.d("EventFilterDialog", "Selected User: ${ChooseUser?.firstName!!}")
+
+            if(ChooseUser!=null){
+                markerViewModel.filterMarkersByUserName(ChooseUser!!.firstName, ChooseUser!!.lastName) { filteredMarkers ->
+                }
+            }
+            else {
+                markerViewModel.filterMarkers(Category, ChooseEventName, selectedCrowdLevel)
+
+            }
                 onDismiss() // Zatvori dijalog nakon filtriranja
             }) {
                 Text("Filter")
