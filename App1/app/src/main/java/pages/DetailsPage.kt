@@ -93,7 +93,7 @@ fun DetailsPage(
                     InfoBox(label = "User ID", value = marker.userId)
                     InfoBox(label = "Event Type", value = marker.eventType)
                     InfoBox(label = "Description", value = marker.description)
-                    InfoBox(label = "Crowd Level", value = marker.crowd.toString())
+                    InfoBox(label = "Crowd Level", value = marker.crowdLevel.toString())
 
                     if (marker.mainImage.isNotEmpty()) {
                         Log.d("ImageDebug", "Image URL: ${marker.mainImage}") // Dodaj log za URL slike

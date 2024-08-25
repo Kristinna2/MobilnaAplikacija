@@ -156,7 +156,13 @@ fun EventFilterDialog(
 
 
                 TextButton(onClick = { isCrowdLevelDropdownExpanded = !isCrowdLevelDropdownExpanded }) {
-                    Text("Crowd Level: $selectedCrowdLevel")
+                    val crowdLevelText = if (selectedCrowdLevel != null) {
+                        selectedCrowdLevel.toString() // Prikazivanje samo odabranog nivoa gužve
+                    } else {
+                        "Select Crowd Level" // Prikazivanje teksta ako nivo nije odabran
+                    }
+
+                    Text(crowdLevelText)
                 }
 
                 DropdownMenu(
