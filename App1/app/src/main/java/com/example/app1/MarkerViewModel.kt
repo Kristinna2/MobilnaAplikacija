@@ -82,7 +82,7 @@ class MarkerViewModel(private val context: Context) : ViewModel() {
                 if (snapshots != null) {
                     val markerList = snapshots.mapNotNull { doc ->
                         // Pretvori dokument u Marker klasu
-                        val marker = doc.toObject(Marker::class.java).copy(userId = doc.id)
+                        val marker = doc.toObject(Marker::class.java).copy(id = doc.id)
 
                         // Proveri da li marker ima važne vrednosti, kao što su eventName i location
                         if (marker.eventName.isNotEmpty() && marker.location != GeoPoint(0.0, 0.0)) {
@@ -146,20 +146,20 @@ fun getUserIdByNameFromFirestore(firstName: String, lastName: String, onResult: 
 
     fun filterMarkersByUserName(firstName: String, lastName: String, onResult: (List<Marker>) -> Unit) {
         getUserIdByNameFromFirestore(firstName, lastName) { userId ->
-            Log.d("MarkerViewModel", "Dobijeni userId: $userId")
+            // Logujemo dobijeni userId
+            Log.d("FilterMarkers", "Dobijeni userId: $userId")
 
             if (userId != null) {
+                // Ako je pronađen ID, filtriramo markere
+                val filteredMarkers = _markers.value?.filter { marker ->
+                    marker.userId == userId
+                } ?: emptyList()
 
-                eventViewModel.filterEventsByUserId(userId) { filteredEvents ->
-                    Log.d("MarkerViewModel", "Filtrirani događaji: $filteredEvents")
-                    val markers = convertFilteredEventsToMarkers(filteredEvents)
+                // Vraćamo filtrirane markere
+                onResult(filteredMarkers)
+                _filteredMarkers.value = filteredMarkers // Resetovanje filtriranih markera
 
-                    _filteredMarkers.value = markers //ali filtered events su tipa marker
-                    _isFilterApplied.value = true // Obeležavamo da je filter primenjen
-
-                    // Ako trebaš da vratiš filtrirane markere, možeš to dodati ovde
-                    onResult(emptyList()) // Ili neki drugi rezultat po tvom izboru
-                }
+                _isFilterApplied.value = true // Resetovanje filtera
             } else {
                 // Ako korisnik nije pronađen, vraćamo praznu listu
                 onResult(emptyList())

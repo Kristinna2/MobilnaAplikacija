@@ -1,6 +1,5 @@
 package pages
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,7 +17,11 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -33,25 +36,28 @@ import coil.request.ImageRequest
 import com.example.app1.EventViewModel
 import com.example.app1.EventViewModelFactory
 import com.example.app1.Marker
+import com.example.app1.UsersViewModel
 import com.google.gson.Gson
 
 @Composable
 fun DetailsPage(
     navController: NavController,
-    eventViewModel: EventViewModel = viewModel(factory = EventViewModelFactory())
+    eventViewModel: EventViewModel = viewModel(factory = EventViewModelFactory()),
 ) {
     val markerDataJson = navController.previousBackStackEntry
         ?.savedStateHandle
         ?.get<String>("markerData")
 
     val markerData = Gson().fromJson(markerDataJson, Marker::class.java)
-   // val event by eventViewModel.events.collectAsState()
 
+  val  usersViewModel: UsersViewModel = viewModel() // Inicijalizacija UsersViewModel
 
+    var userName by remember { mutableStateOf("") }
 
-    LaunchedEffect(markerData) {
-        markerData?.let {
-
+    // Uzimamo userId i dohvatamo ime korisnika
+    markerData?.userId?.let { userId ->
+        usersViewModel.users.collectAsState().value.find { user -> user.id == userId }?.let { user ->
+            userName = "${user.firstName} ${user.lastName}"
         }
     }
 
@@ -90,14 +96,13 @@ fun DetailsPage(
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
 
-                    InfoBox(label = "User ID", value = marker.userId)
+                    // Prikaz imena korisnika umesto userId
+                    InfoBox(label = "User", value = userName)
                     InfoBox(label = "Event Type", value = marker.eventType)
                     InfoBox(label = "Description", value = marker.description)
                     InfoBox(label = "Crowd Level", value = marker.crowdLevel.toString())
 
                     if (marker.mainImage.isNotEmpty()) {
-                        Log.d("ImageDebug", "Image URL: ${marker.mainImage}") // Dodaj log za URL slike
-
                         Spacer(modifier = Modifier.height(16.dp))
                         AsyncImage(
                             model = ImageRequest.Builder(LocalContext.current)
@@ -111,7 +116,6 @@ fun DetailsPage(
                                 .background(Color.Gray)
                         )
                     }
-
 
                     if (marker.galleryImages.isNotEmpty()) {
                         Spacer(modifier = Modifier.height(16.dp))
