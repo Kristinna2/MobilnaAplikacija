@@ -19,6 +19,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -28,6 +30,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.example.app1.Event
+import com.example.app1.EventViewModel
 import com.example.app1.User
 import com.example.app1.UsersViewModel
 
@@ -37,6 +41,9 @@ fun UsersPage(
     navController: NavController // Add the NavController as a parameter
 ) {
     val usersState = viewModel.users.collectAsState()
+    val eventsState = remember { mutableStateMapOf<String, List<Event>>() }
+   val eventViewModel: EventViewModel = viewModel() // Make sure this is the correct ViewModel
+
 
     Column(
         modifier = Modifier
@@ -52,13 +59,23 @@ fun UsersPage(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // LazyColumn already enables scrolling
+        // LazyColumn for displaying the list of users
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier.weight(1f) // Allows the LazyColumn to take available space
         ) {
             items(usersState.value) { user ->
-                UserItem(user)
+                UserItem(user) { userId ->
+                    // Fetch events for the selected user
+                    eventViewModel.filterEventsByUserId(userId) { events ->
+                        eventsState[userId] = events
+                    }
+                }
+
+                // Display the events associated with the user
+                eventsState[user.id]?.let { events ->
+                    EventsList(events)
+                }
             }
         }
 
@@ -79,7 +96,7 @@ fun UsersPage(
 }
 
 @Composable
-fun UserItem(user: User) {
+fun UserItem(user: User, onFetchEvents: (String) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -118,6 +135,28 @@ fun UserItem(user: User) {
             Text(
                 text = "Phone: ${user.phoneNumber}",
                 fontSize = 14.sp
+            )
+            // Button to fetch events for the user
+            Button(onClick = { onFetchEvents(user.id) }) {
+                Text(text = "Show Events")
+            }
+        }
+    }
+}
+
+@Composable
+fun EventsList(events: List<Event>) {
+    Column(modifier = Modifier.padding(start = 16.dp)) {
+        Text(
+            text = "Events:",
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Bold
+        )
+        for (event in events) {
+            Text(
+                text = event.eventName,
+                fontSize = 14.sp,
+                modifier = Modifier.padding(vertical = 4.dp)
             )
         }
     }
