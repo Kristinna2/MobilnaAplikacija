@@ -24,6 +24,10 @@ class MarkerViewModel(private val context: Context) : ViewModel() {
     private val _markers = MutableStateFlow<List<Marker>>(emptyList())
     val markers: StateFlow<List<Marker>> = _markers
 
+    //dodajem ove dve
+    private val _filteredMarkers = MutableStateFlow<List<Marker>>(emptyList())
+    val filteredMarkers: StateFlow<List<Marker>> = _filteredMarkers
+
     private val firestore = FirebaseFirestore.getInstance()
     private var markerListenerRegistration: ListenerRegistration? = null
 
@@ -42,6 +46,47 @@ class MarkerViewModel(private val context: Context) : ViewModel() {
                 Log.e("HomeViewModel", "Error adding event: ", e)
             }
     }
+
+    fun getUserNameById(userId: String, onResult: (String?) -> Unit) {
+        firestore.collection("users").document(userId)
+            .get()
+            .addOnSuccessListener { document ->
+                if (document != null) {
+                    val firstName = document.getString("firstName") ?: ""
+                    val lastName = document.getString("lastName") ?: ""
+                    onResult("$firstName $lastName") // Vraća puno ime
+                } else {
+                    Log.d("MarkerViewModel", "No such document")
+                    onResult(null) // Nema korisnika
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.e("MarkerViewModel", "Error getting user: ", e)
+                onResult(null) // Greška u preuzimanju
+            }
+    }
+
+    fun getUserIdByName(firstName: String, lastName: String, onResult: (String?) -> Unit) {
+        firestore.collection("users")
+            .whereEqualTo("firstName", firstName)
+            .whereEqualTo("lastName", lastName)
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                if (!querySnapshot.isEmpty) {
+                    val document = querySnapshot.documents[0]
+                    val userId = document.id // Vraća ID dokumenta koji predstavlja userId
+                    onResult(userId)
+                } else {
+                    Log.d("MarkerViewModel", "No such user")
+                    onResult(null) // Nema korisnika sa tim imenom i prezimenom
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.e("MarkerViewModel", "Error getting user: ", e)
+                onResult(null) // Greška u preuzimanju
+            }
+    }
+
     private var listenerRegistration: ListenerRegistration? = null
 
 
@@ -70,6 +115,30 @@ class MarkerViewModel(private val context: Context) : ViewModel() {
                 }
             }
     }
+//i ovo
+
+    fun filterMarkers(category: String,eventName: String, crowdLevel: Int) {
+        val filtered = _markers.value?.filter { marker ->
+
+
+            // Proveravamo da li marker odgovara kategoriji
+            val matchesCategory = (category != "Select Category" && marker.eventType == category)
+            // Proveravamo da li marker odgovara imenu događaja
+            val matchesEventName = (eventName != "Select Event Name" && marker.eventName == eventName)
+            // Proveravamo da li marker odgovara nivou gužve
+            val matchesCrowdLevel = (crowdLevel != 0 && marker.crowd == crowdLevel)
+
+            // Na osnovu uslova se koristi logički "I"
+            matchesCategory || matchesEventName || matchesCrowdLevel  // Svi uslovi se povezuju sa logičkim "ILI"
+        } ?: emptyList()
+
+        // Postavljamo filtrirane markere
+        _filteredMarkers.value = filtered
+        Log.d("MarkerViewModel", "Filtered markers: ${filtered.joinToString { it.eventName }}")
+    }
+
+
+
 
 
 

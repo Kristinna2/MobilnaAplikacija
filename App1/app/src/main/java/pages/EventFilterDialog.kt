@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.app1.Event
 import com.example.app1.EventViewModel
+import com.example.app1.MarkerViewModel
 import com.example.app1.Resource
 import com.example.app1.User
 import com.example.app1.UsersViewModel
@@ -39,7 +40,7 @@ fun EventFilterDialog(
     var ChooseEventName by remember { mutableStateOf("Select Event Name") }
     val usersState by usersViewModel.users.collectAsState()
     var isCrowdLevelDropdownExpanded by remember { mutableStateOf(false) }
-    var selectedCrowdLevel by remember { mutableStateOf(1) }
+    var selectedCrowdLevel by remember { mutableStateOf(0) }
 
     var Category by remember { mutableStateOf("Select Category") }
 
@@ -50,6 +51,7 @@ fun EventFilterDialog(
         is Resource.Failure -> emptyList() // Ili neka druga logika za greške
         is Resource.Loading -> emptyList() // U slučaju učitavanja
     }
+   val markerViewModel: MarkerViewModel = viewModel()
 
 
     AlertDialog(
@@ -167,7 +169,7 @@ fun EventFilterDialog(
                                 selectedCrowdLevel = level
                                 isCrowdLevelDropdownExpanded = false
                             },
-                            text = { Text("Level $level") }
+                            text = { Text("$level") }
                         )
                     }
                 }
@@ -175,7 +177,7 @@ fun EventFilterDialog(
         },
         confirmButton = {
             TextButton(onClick = {
-
+                markerViewModel.filterMarkers(Category,ChooseEventName,selectedCrowdLevel)
                 onDismiss() // Zatvori dijalog nakon filtriranja
             }) {
                 Text("Filter")

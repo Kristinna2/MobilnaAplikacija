@@ -1,5 +1,6 @@
 package pages
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -45,6 +46,7 @@ fun DetailsPage(
 
     val markerData = Gson().fromJson(markerDataJson, Marker::class.java)
    // val event by eventViewModel.events.collectAsState()
+
 
 
     LaunchedEffect(markerData) {
@@ -94,6 +96,8 @@ fun DetailsPage(
                     InfoBox(label = "Crowd Level", value = marker.crowd.toString())
 
                     if (marker.mainImage.isNotEmpty()) {
+                        Log.d("ImageDebug", "Image URL: ${marker.mainImage}") // Dodaj log za URL slike
+
                         Spacer(modifier = Modifier.height(16.dp))
                         AsyncImage(
                             model = ImageRequest.Builder(LocalContext.current)

@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,6 +28,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -44,6 +46,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -256,7 +259,33 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
                     .padding(8.dp)
                     .weight(1f) // Povećaj visinu mape
             ) {
-
+                TextField(
+                    value = searchQuery.value.text,
+                    onValueChange = { newValue ->
+                        searchQuery.value = TextFieldValue(newValue)
+                    },
+                    placeholder = { Text(text = "Search...") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .align(Alignment.TopCenter)
+                        .background(Color.White, RoundedCornerShape(8.dp)) // Dodaj pozadinsku boju i zaobljenje
+                        .border(1.dp, Color.Gray, RoundedCornerShape(8.dp)) // Dodaj border za bolju vidljivost
+                        .zIndex(1f), // Postavi TextField iznad mape
+                    maxLines = 1,
+                    singleLine = true,
+                    colors = TextFieldDefaults.colors(
+                        focusedTextColor = Color.Black,
+                        unfocusedTextColor = Color.Black,
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        cursorColor = Color.Black,
+                        focusedPlaceholderColor = Color.Gray,
+                        unfocusedPlaceholderColor = Color.Gray,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent
+                    )
+                )
                 GoogleMap(
                     modifier = Modifier.fillMaxSize(),
                     cameraPositionState = cameraPositionState,
