@@ -21,6 +21,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -156,7 +157,7 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
     var showDialog by remember { mutableStateOf(false) }
 
     var isFilterButtonPressed by remember { mutableStateOf(false) }
- //   var isMarkerButtonPressed by remember { mutableStateOf(false) }
+    var isMarkerButtonPressed by remember { mutableStateOf(false) }
 
 
     if (showDialog) {
@@ -182,6 +183,10 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
             cameraPositionState.position = CameraPosition.fromLatLngZoom(it, 15f)
         }
     }
+//DODATO
+    val filteredMarkers by markerViewModel.filteredMarkers.observeAsState(emptyList())
+    val isFilterApplied by markerViewModel.isFilterApplied.observeAsState(false) // Da li je filter primenjen
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -250,7 +255,23 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
             }
         }
 
-
+        Button(
+            onClick = {
+                markerViewModel.resetFilter() // Resetuje filter
+            },
+            modifier = Modifier
+                .fillMaxWidth() // Puni širinu
+                .padding(vertical = 8.dp), // Razmak oko dugmeta
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFFF75553) // Boja pozadine dugmeta
+            )
+        ) {
+            Text(
+                text = "Reset Filter",
+                fontSize = 16.sp,
+                color = Color.White
+            )
+        }
             // Search bar
 
             Box(
@@ -286,6 +307,12 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
                         unfocusedIndicatorColor = Color.Transparent
                     )
                 )
+                val markersToDisplay = if (isFilterApplied) {
+                    filteredMarkers // Prikazujemo filtrirane markere
+                } else {
+                    markers // Prikazujemo sve markere
+                }
+
                 GoogleMap(
                     modifier = Modifier.fillMaxSize(),
                     cameraPositionState = cameraPositionState,
@@ -293,7 +320,7 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
                         if (!isFilterButtonPressed) {
                             selectedMarker = latLng
                             showDialog = true
-
+                            isMarkerButtonPressed=true
                         }
                     }
                 ) {
@@ -311,7 +338,8 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
                             icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)
                         )
                     }
-                    markers.filter { it.eventName.contains(searchQuery.value.text, ignoreCase = true) }
+
+                    markersToDisplay.filter { it.eventName.contains(searchQuery.value.text, ignoreCase = true) }
                         .forEach { marker ->
                             Marker(
                                 state = MarkerState(
@@ -355,8 +383,10 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
                 Button(
                     onClick = {
 
+                        isMarkerButtonPressed=false
                             isFilterButtonPressed = true
                             showDialog = true
+
 
                     },
 
@@ -375,7 +405,7 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
                         color = Color.White
                     )
                 }
-                if (showDialog) {
+                if (showDialog && !isMarkerButtonPressed) {
 
                         EventFilterDialog(
                             onDismiss = { showDialog = false },

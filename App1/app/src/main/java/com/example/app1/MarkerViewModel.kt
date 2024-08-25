@@ -2,6 +2,8 @@ package com.example.app1
 
 import android.content.Context
 import android.util.Log
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
@@ -25,8 +27,11 @@ class MarkerViewModel(private val context: Context) : ViewModel() {
     val markers: StateFlow<List<Marker>> = _markers
 
     //dodajem ove dve
-    private val _filteredMarkers = MutableStateFlow<List<Marker>>(emptyList())
-    val filteredMarkers: StateFlow<List<Marker>> = _filteredMarkers
+    private val _filteredMarkers = MutableLiveData<List<Marker>>() // Lista filtriranih markera
+    val filteredMarkers: LiveData<List<Marker>> get() = _filteredMarkers
+//dodato
+    private val _isFilterApplied = MutableLiveData<Boolean>(false) // Stanje da li je filter primenjen
+    val isFilterApplied: LiveData<Boolean> get() = _isFilterApplied
 
     private val firestore = FirebaseFirestore.getInstance()
     private var markerListenerRegistration: ListenerRegistration? = null
@@ -134,11 +139,16 @@ class MarkerViewModel(private val context: Context) : ViewModel() {
 
         // Postavljamo filtrirane markere
         _filteredMarkers.value = filtered
+        _isFilterApplied.value = true // Obeležavamo da je filter primenjen
+
         Log.d("MarkerViewModel", "Filtered markers: ${filtered.joinToString { it.eventName }}")
     }
 
 
-
+    fun resetFilter() {
+        _isFilterApplied.value = false // Resetovanje filtera
+        _filteredMarkers.value = emptyList() // Resetovanje filtriranih markera
+    }
 
 
 
