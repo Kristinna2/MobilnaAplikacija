@@ -50,7 +50,7 @@ fun DetailsPage(
 
     val markerData = Gson().fromJson(markerDataJson, Marker::class.java)
 
-  val  usersViewModel: UsersViewModel = viewModel() // Inicijalizacija UsersViewModel
+    val  usersViewModel: UsersViewModel = viewModel() // Inicijalizacija UsersViewModel
 
     var userName by remember { mutableStateOf("") }
 

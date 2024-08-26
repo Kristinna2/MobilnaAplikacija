@@ -9,14 +9,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.maps.model.LatLng
-import com.google.firebase.Firebase
-import com.google.firebase.firestore.GeoPoint
-import com.google.firebase.firestore.firestore
-import com.google.firebase.storage.storage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import java.util.UUID
 
 
 class EventViewModel: ViewModel() {
@@ -43,7 +38,7 @@ class EventViewModel: ViewModel() {
     val userEvents: StateFlow<Resource<List<Event>>> get() = _userEvents
     private val _filteredEvents = MutableLiveData<Resource<List<Event>>>()
 
- //   val filteredEvents: StateFlow<Resource<List<Event>>> get() = _filteredEvents
+    //   val filteredEvents: StateFlow<Resource<List<Event>>> get() = _filteredEvents
 
 
     init {
@@ -61,46 +56,27 @@ class EventViewModel: ViewModel() {
 
 
     fun saveEventData(
-        eventType: String,
-        eventName: String,
         description: String,
         crowd: Int,
         mainImage: Uri,
+        eventName: String,
+        eventType: String,
         galleryImages: List<Uri>,
         location: LatLng?
-    ) {
-        val storageRef = Firebase.storage.reference.child("images/${UUID.randomUUID()}")
-        val uploadTask = storageRef.putFile(mainImage)
-
-        uploadTask.addOnSuccessListener {
-            storageRef.downloadUrl.addOnSuccessListener { uri ->
-                val eventData = hashMapOf(
-                    "eventType" to eventType,
-                    "eventName" to eventName,
-                    "description" to description,
-                    "crowd" to crowd,
-                    "mainImage" to uri.toString(),
-                    "galleryImages" to galleryImages.map { it.toString() },
-                    "location" to location?.let { GeoPoint(it.latitude, it.longitude) }
-                )
-
-                // Spremi landmarkData u bazu podataka
-                Firebase.firestore.collection("events")
-                    .add(eventData)
-                    .addOnSuccessListener {
-                        // Uspješno spremljeno
-                        _eventFlow.value = Resource.Success("Event successfully added!")
-                    }
-                    .addOnFailureListener {
-                        // Greška prilikom spremanja
-                        _eventFlow.value = Resource.Failure(it)
-                    }
-            }
-        }.addOnFailureListener {
-            // Greška prilikom upload-a slike
-            _eventFlow.value = Resource.Failure(it)
-        }
+    ) = viewModelScope.launch {
+        _eventFlow.value = Resource.Loading
+        repository.saveEventData(
+            description = description,
+            crowd = crowd,
+            mainImage = mainImage,
+            eventName = eventName,
+            eventType = eventType,
+            galleryImages = galleryImages,
+            location = location!!
+        )
+        _eventFlow.value = Resource.Success("Uspešno dodat dogadjaj")
     }
+
 
     /* fun loadEventData(markerJson: String) {
         val marker = Gson().fromJson(markerJson, Event::class.java)
