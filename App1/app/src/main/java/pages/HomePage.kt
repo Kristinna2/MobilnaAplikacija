@@ -116,8 +116,8 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
                     super.onLocationResult(locationResult)
                     locationResult.locations.forEach { location ->
                         Log.d("HomePage", "Updated Location: ${location.latitude}, ${location.longitude}")
-                     currentLocation.value = LatLng(location.latitude, location.longitude)                    }
-                     //  currentLocation.value = LatLng(37.3800000, -122.1400000)}
+                    currentLocation.value = LatLng(location.latitude, location.longitude)                    }
+                   //   currentLocation.value = LatLng(37.3800000, -122.1600000)}
 
                 }
             }, null)
@@ -159,7 +159,12 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
     var isFilterButtonPressed by remember { mutableStateOf(false) }
     var isMarkerButtonPressed by remember { mutableStateOf(false) }
 
-
+    var showFilterDialog by remember { mutableStateOf(false) }
+    if (showFilterDialog) {
+        EventFilterDialog(
+            onDismiss = { showFilterDialog = false }
+        )
+    }
     if (showDialog) {
         MarkerNameDialog(
             markerName = markerName,
@@ -186,6 +191,9 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
 //DODATO
     val filteredMarkers by markerViewModel.filteredMarkers.observeAsState(emptyList())
     val isFilterApplied by markerViewModel.isFilterApplied.observeAsState(false) // Da li je filter primenjen
+
+    val currentUser = authViewModel.getCurrentUser()
+
 
     Column(
         modifier = modifier
@@ -234,7 +242,11 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
                         text = { Text("User Profile", color = Color.White) },
                         onClick = {
                             expanded = false
-                            navController.navigate("user_profile")
+                            currentUser?.let {
+                                Log.d("HomePage", "Navigating to User Profile with userId: ${it.uid}")
+
+                                navController.navigate("user_profile/${it.uid}")
+                            }
                         }
                     )
                     DropdownMenuItem(
@@ -242,6 +254,13 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
                         onClick = {
                             expanded = false
                             navController.navigate("all_users")
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("All Events", color = Color.White) },
+                        onClick = {
+                            expanded = false
+                            navController.navigate("allevents") // Nova ruta za navigaciju
                         }
                     )
                     DropdownMenuItem(

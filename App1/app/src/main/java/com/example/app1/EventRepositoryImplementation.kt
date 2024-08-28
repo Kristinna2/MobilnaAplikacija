@@ -85,4 +85,19 @@ class EventRepositoryImplementation : EventRepository {
             Resource.Failure(e)
         }
     }
+
+    override suspend fun getEventById(id: String): Resource<Event> {
+        return try {
+            val snapshot = firestoreInstance.collection("landmarks").document(id).get().await()
+            val landmark = snapshot.toObject(Event::class.java)
+            if (landmark != null) {
+                Resource.Success(landmark)
+            } else {
+                Resource.Failure(Exception("Landmark not found"))
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Resource.Failure(e)
+        }
+    }
 }

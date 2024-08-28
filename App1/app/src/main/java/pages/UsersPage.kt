@@ -1,5 +1,6 @@
 package pages
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -44,6 +45,8 @@ fun UsersPage(
     val eventsState = remember { mutableStateMapOf<String, List<Event>>() }
    val eventViewModel: EventViewModel = viewModel() // Make sure this is the correct ViewModel
 
+    val sortedUsers = usersState.value.sortedByDescending { it.points }
+
 
     Column(
         modifier = Modifier
@@ -62,17 +65,20 @@ fun UsersPage(
         // LazyColumn for displaying the list of users
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.weight(1f) // Allows the LazyColumn to take available space
+            modifier = Modifier.weight(1f)
         ) {
-            items(usersState.value) { user ->
-                UserItem(user) { userId ->
-                    // Fetch events for the selected user
-                    eventViewModel.filterEventsByUserId(userId) { events ->
-                        eventsState[userId] = events
-                    }
-                }
-
-                // Display the events associated with the user
+            items(sortedUsers) { user ->
+                UserItem(
+                    user = user,
+                   // isTopUser = sortedUsers.indexOf(user) < 3,
+                    onFetchEvents = { userId ->
+                        // Fetch events for the selected user
+                        eventViewModel.filterEventsByUserId(userId) { events ->
+                            eventsState[userId] = events
+                        }
+                    },
+                    navController = navController
+                )
                 eventsState[user.id]?.let { events ->
                     EventsList(events)
                 }
@@ -96,7 +102,7 @@ fun UsersPage(
 }
 
 @Composable
-fun UserItem(user: User, onFetchEvents: (String) -> Unit) {
+fun UserItem(user: User, onFetchEvents: (String) -> Unit,navController:NavController) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -139,6 +145,17 @@ fun UserItem(user: User, onFetchEvents: (String) -> Unit) {
             // Button to fetch events for the user
             Button(onClick = { onFetchEvents(user.id) }) {
                 Text(text = "Show Events")
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            Button(onClick = {
+                val userId = user.id
+                if (userId != null) {
+                    navController.navigate("user_profile/$userId")
+                } else {
+                    Log.e("UserItem", "User ID is null")
+                }
+            }) {
+                Text(text = "Show Profile")
             }
         }
     }

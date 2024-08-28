@@ -40,11 +40,13 @@ import com.google.firebase.firestore.FirebaseFirestore
 fun UserProfilePage(
     modifier: Modifier = Modifier,
     navController: NavController,
-    authViewModel: AuthViewModel
+    authViewModel: AuthViewModel,
+    userId: String?
+
 ) {
-    val authState by authViewModel.authState.observeAsState()
-    val user = authViewModel.getCurrentUser()
-    val userId = user?.uid
+  //  val authState by authViewModel.authState.observeAsState()
+  //  val user = authViewModel.getCurrentUser()
+  //  val userId = user?.uid
 
     // State variables for user data
     var firstName by remember { mutableStateOf<String?>(null) }

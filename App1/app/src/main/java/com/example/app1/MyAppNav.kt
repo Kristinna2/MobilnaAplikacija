@@ -6,6 +6,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import pages.AllEventsPage
 import pages.DetailsPage
 import pages.EventDetailsPage
 import pages.HomePage
@@ -30,8 +31,9 @@ fun MyAppNavigation(modifier: Modifier = Modifier,authViewModel: AuthViewModel) 
         composable("home"){
             HomePage(modifier,navController,authViewModel)
         }
-        composable("user_profile") {
-            UserProfilePage(modifier,navController,authViewModel)
+        composable("user_profile/{userId}") { backStackEntry ->
+            val userId = backStackEntry.arguments?.getString("userId")
+            UserProfilePage(modifier,navController,authViewModel, userId)
         }
         composable("all_users") {
             UsersPage(navController=navController)
@@ -44,6 +46,9 @@ fun MyAppNavigation(modifier: Modifier = Modifier,authViewModel: AuthViewModel) 
         }
         composable("details") {
            DetailsPage(navController = navController)
+        }
+        composable("allevents") { // Dodaj novu rutu za `AllEventsPage`
+            AllEventsPage(navController = navController)
         }
 
 

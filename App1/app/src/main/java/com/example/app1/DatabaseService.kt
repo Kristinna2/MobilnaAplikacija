@@ -7,7 +7,9 @@ data class CustomUser(
     val firstName: String = "",
     val lastName: String = "",
     val phoneNumber: String = "",
-    val photoUrl: String? = null
+    val photoUrl: String? = null,
+    val points: Int = 0
+
 )
 
 class DatabaseService(
@@ -26,7 +28,7 @@ class DatabaseService(
         }
     }
 
-   /* suspend fun addPoints(
+    suspend fun addPoints(
         uid: String,
         points: Int
     ): Resource<String>{
@@ -52,7 +54,6 @@ class DatabaseService(
             Resource.Failure(e)
         }
     }
-*/
     suspend fun getUserData(
         uid: String
     ):Resource<String>{
@@ -90,7 +91,7 @@ class DatabaseService(
         }
     }
 
-   /* suspend fun saveRateData(
+    suspend fun saveRateData(
         rate: Rate
     ): Resource<String>{
         return try{
@@ -115,5 +116,4 @@ class DatabaseService(
             Resource.Failure(e)
         }
     }
-*/
 }

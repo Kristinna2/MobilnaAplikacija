@@ -11,7 +11,9 @@ data class User(
     val firstName: String = "",
     val lastName: String = "",
     val phoneNumber: String = "",
-    val photoUrl: String? = null
+    val photoUrl: String? = null,
+    val points: Int
+
 )
 
 class UsersViewModel : ViewModel() {
@@ -40,7 +42,9 @@ class UsersViewModel : ViewModel() {
                         firstName = document.getString("firstName") ?: "",
                         lastName = document.getString("lastName") ?: "",
                         phoneNumber = document.getString("phoneNumber") ?: "",
-                        photoUrl = document.getString("photoUrl")
+                        photoUrl = document.getString("photoUrl"),
+                        points= document.getLong("points")?.toInt()?:0
+
                     )
                 }
                 _users.value = userList

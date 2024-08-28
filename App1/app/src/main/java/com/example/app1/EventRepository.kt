@@ -20,4 +20,7 @@ interface EventRepository {
     suspend fun getUserEvent(
         uid: String
     ): Resource<List<Event>>
+
+    suspend fun getEventById(id: String): Resource<Event>
+
 }

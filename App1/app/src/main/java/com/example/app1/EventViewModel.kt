@@ -3,6 +3,7 @@ package com.example.app1
 
 import android.net.Uri
 import android.util.Log
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -18,20 +19,22 @@ class EventViewModel: ViewModel() {
 
 
     val repository = EventRepositoryImplementation()
+    val rateRepository = RateRepositoryImpl()
+
     var eventData = mutableStateOf<Event?>(null)
 
 
     private val _eventFlow = MutableStateFlow<Resource<String>?>(null)
     val eventFlow: StateFlow<Resource<String>?> = _eventFlow
 
-    // private val _newRate = MutableStateFlow<Resource<String>?>(null)
-    // val newRate: StateFlow<Resource<String>?> = _newRate
+    private val _newRate = MutableStateFlow<Resource<String>?>(null)
+    val newRate: StateFlow<Resource<String>?> = _newRate
 
     private val _events = MutableStateFlow<Resource<List<Event>>>(Resource.Success(emptyList()))
     val events: StateFlow<Resource<List<Event>>> get() = _events
 
-    // private val _rates = MutableStateFlow<Resource<List<Rate>>>(Resource.Success(emptyList()))
-    //  val rates: StateFlow<Resource<List<Rate>>> get() = _rates
+    private val _rates = MutableStateFlow<Resource<List<Rate>>>(Resource.Success(emptyList()))
+    val rates: StateFlow<Resource<List<Rate>>> get() = _rates
 
 
     private val _userEvents = MutableStateFlow<Resource<List<Event>>>(Resource.Success(emptyList()))
@@ -40,7 +43,15 @@ class EventViewModel: ViewModel() {
 
     //   val filteredEvents: StateFlow<Resource<List<Event>>> get() = _filteredEvents
 
+    private val _eventDetail = MutableStateFlow<Resource<Event>?>(null)
+    val eventDetail: StateFlow<Resource<Event>?> = _eventDetail
 
+    private val _averageRate = MutableStateFlow<Resource<Double>?>(null)
+    val averageRate: StateFlow<Resource<Double>?> = _averageRate
+
+    fun recalculateAverageRate(eventId: String) = viewModelScope.launch {
+        _averageRate.value = rateRepository.recalculateAverageRate(eventId)
+    }
     init {
         getAllEvents()
     }
@@ -48,7 +59,21 @@ class EventViewModel: ViewModel() {
     fun getAllEvents() = viewModelScope.launch {
         _events.value = repository.getAllEvents()
     }
+   fun getEventDetail(eventId: String) = viewModelScope.launch {
+        _eventDetail.value = Resource.Loading
+        _eventDetail.value = repository.getEventById(eventId)
 
+        getEventAllRates(eventId)
+
+    }
+
+    private val _selectedEvent = mutableStateOf<Event?>(null)
+    val selectedEvent: State<Event?> get() = _selectedEvent
+
+    // Funkcija za postavljanje izabranog događaja
+    fun setSelectedEvent(event: Event) {
+        _selectedEvent.value = event
+    }
 
     fun setEventData(marker: Event) {
         eventData.value = marker
@@ -98,29 +123,30 @@ class EventViewModel: ViewModel() {
         }
     }
 */
-    /*fun getBeachAllRates(
+    fun getEventAllRates(
         bid: String
     ) = viewModelScope.launch {
-        _rates.value = Resource.loading
-        val result = rateRepository.getBeachRates(bid)
+        _rates.value = Resource.Loading
+        val result = rateRepository.getEventsRates(bid)
         _rates.value = result
     }
 
     fun addRate(
         bid: String,
         rate: Int,
-        beach: Beach
+        event: Event
     ) = viewModelScope.launch {
-        _newRate.value = rateRepository.addRate(bid, rate, beach)
+        _newRate.value = rateRepository.addRate(bid, rate, event)
     }
 
     fun updateRate(
         rid: String,
         rate: Int
-    ) = viewModelScope.launch{
+    ) = viewModelScope.launch {
         _newRate.value = rateRepository.updateRate(rid, rate)
+        //  recalculateAverageRate(rid)
     }
-*/
+
     fun getUserEvents(
         uid: String
     ) = viewModelScope.launch {
