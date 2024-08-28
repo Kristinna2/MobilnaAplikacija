@@ -70,7 +70,7 @@ fun UsersPage(
             items(sortedUsers) { user ->
                 UserItem(
                     user = user,
-                   // isTopUser = sortedUsers.indexOf(user) < 3,
+                   isTopUser = sortedUsers.indexOf(user) < 3,
                     onFetchEvents = { userId ->
                         // Fetch events for the selected user
                         eventViewModel.filterEventsByUserId(userId) { events ->
@@ -102,7 +102,8 @@ fun UsersPage(
 }
 
 @Composable
-fun UserItem(user: User, onFetchEvents: (String) -> Unit,navController:NavController) {
+fun UserItem(user: User, onFetchEvents: (String) -> Unit,    isTopUser: Boolean,
+             navController:NavController) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -141,6 +142,11 @@ fun UserItem(user: User, onFetchEvents: (String) -> Unit,navController:NavContro
             Text(
                 text = "Phone: ${user.phoneNumber}",
                 fontSize = 14.sp
+            )
+            Text(
+                text = "Points: ${user.points}",
+                fontSize = 14.sp,
+                color = if (isTopUser) Color.Green else Color.White
             )
             // Button to fetch events for the user
             Button(onClick = { onFetchEvents(user.id) }) {

@@ -1,5 +1,6 @@
 package pages
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -42,37 +43,41 @@ fun UserProfilePage(
     navController: NavController,
     authViewModel: AuthViewModel,
     userId: String?
-
 ) {
-  //  val authState by authViewModel.authState.observeAsState()
-  //  val user = authViewModel.getCurrentUser()
-  //  val userId = user?.uid
-
     // State variables for user data
     var firstName by remember { mutableStateOf<String?>(null) }
     var lastName by remember { mutableStateOf<String?>(null) }
     var phoneNumber by remember { mutableStateOf<String?>(null) }
     var photoUrl by remember { mutableStateOf<String?>(null) }
+  //  var totalRatings by remember { mutableStateOf(0) } // Total ratings sum
+
+    var points by remember { mutableStateOf<Int?>(null) }
 
     val eventViewModel: EventViewModel = viewModel()
     var events by remember { mutableStateOf<List<Event>>(emptyList()) } // List of user's events
 
-    // Fetch user data
+    // Fetch user data and ratings
     LaunchedEffect(userId) {
-        userId?.let {
-            val userDocument = FirebaseFirestore.getInstance().collection("users").document(it)
+        userId?.let { id ->
+            // Fetch user data
+            val userDocument = FirebaseFirestore.getInstance().collection("users").document(id)
             userDocument.get().addOnSuccessListener { document ->
                 if (document != null) {
                     firstName = document.getString("firstName")
                     lastName = document.getString("lastName")
                     phoneNumber = document.getString("phoneNumber")
                     photoUrl = document.getString("photoUrl")
+                    points = document.getLong("points")?.toInt()
+
                 }
             }
 
-            eventViewModel.filterEventsByUserId(it) { userEvents ->
+            // Fetch events for the user
+            eventViewModel.filterEventsByUserId(id) { userEvents ->
                 events = userEvents
             }
+
+
         }
     }
 
@@ -134,6 +139,17 @@ fun UserProfilePage(
             fontSize = 24.sp,
             color = Color.Black
         )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+
+        Text(
+            text = "Points: ${points ?: "Nije bilo interakcije"}",
+            fontSize = 24.sp,
+            color = Color.Red
+        )
+
+        Spacer(modifier = Modifier.height(32.dp))
 
         Spacer(modifier = Modifier.height(32.dp))
 
