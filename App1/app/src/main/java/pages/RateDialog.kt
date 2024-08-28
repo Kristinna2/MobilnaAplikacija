@@ -37,6 +37,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -49,6 +50,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.app1.DatabaseService
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.launch
 
 @Composable
 fun RateDialog(
@@ -62,6 +67,12 @@ fun RateDialog(
 
 ) {
     val interactionSource = remember { MutableInteractionSource() }
+
+    val firestore = FirebaseFirestore.getInstance()
+    val databaseService = remember { DatabaseService(firestore) }
+    val uid = FirebaseAuth.getInstance().currentUser?.uid
+    val coroutineScope = rememberCoroutineScope()
+
     AlertDialog(
         modifier = Modifier
             .clip(
@@ -126,6 +137,12 @@ fun RateDialog(
                                 isLoading.value = true
                                 rateEvent()
                                 onRateConfirmed(rate.value) // Poziv lambda funkcije sa izabranom ocenom
+                                val points = 10  // Na primer, 10 poena za ocenu
+                                coroutineScope.launch {
+                                    val result = databaseService.addPoints(uid!!, points)
+                                    // Obrada rezultata (prikazivanje poruke, itd.)
+                                    isLoading.value = false
+                                }
                                 showRateDialog.value = false // Zatvaranje dijaloga
                             },
                             modifier = Modifier

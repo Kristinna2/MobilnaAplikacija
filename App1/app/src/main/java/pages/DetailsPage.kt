@@ -53,6 +53,7 @@ import com.example.app1.Marker
 import com.example.app1.Rate
 import com.example.app1.Resource
 import com.example.app1.UsersViewModel
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.gson.Gson
 import java.math.RoundingMode
 
@@ -110,6 +111,7 @@ fun DetailsPage(
             eventViewModel.getEventDetail(event.id)  // Poziv funkcije
         }
     }
+    val userId = viewModel.getCurrentUser()?.uid
 
     Column(
         modifier = Modifier
@@ -241,7 +243,8 @@ fun DetailsPage(
                             event = event
                         )
                     }
-                    updateRatesAndAverage(rates, myPrice.value, rateExist == null, averageRate)
+                   updateRatesAndAverage(rates, myPrice.value, rateExist == null, averageRate)
+                    addPointsToUser(userId!!, 10)
 
                 },
                 isLoading = isLoading,
@@ -416,4 +419,29 @@ fun inputTextIndicator(textValue: String) {
         ),
         text = textValue
     )
+}
+fun addPointsToUser(userId: String, points: Int) {
+    val db = FirebaseFirestore.getInstance()
+    val userRef = db.collection("users").document(userId)
+
+    userRef.get()
+        .addOnSuccessListener { document ->
+            if (document != null) {
+                val currentPoints = document.getLong("points") ?: 0
+                val newPoints = currentPoints + points
+
+                userRef.update("points", newPoints)
+                    .addOnSuccessListener {
+                        Log.d("Firebase", "Points successfully updated!")
+                    }
+                    .addOnFailureListener { e ->
+                        Log.w("Firebase", "Error updating points", e)
+                    }
+            } else {
+                Log.d("Firebase", "No such document")
+            }
+        }
+        .addOnFailureListener { exception ->
+            Log.d("Firebase", "get failed with ", exception)
+        }
 }
