@@ -72,6 +72,7 @@ class EventViewModel: ViewModel() {
 
     }
 
+    // Izabrani događaj
     private val _selectedEvent = mutableStateOf<Event?>(null)
     val selectedEvent: State<Event?> get() = _selectedEvent
 

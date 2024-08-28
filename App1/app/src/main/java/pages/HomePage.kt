@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -55,8 +56,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.app1.AuthState
 import com.example.app1.AuthViewModel
+import com.example.app1.Event
 import com.example.app1.EventViewModel
 import com.example.app1.MarkerViewModel
+import com.example.app1.Resource
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
@@ -193,6 +196,37 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
     val isFilterApplied by markerViewModel.isFilterApplied.observeAsState(false) // Da li je filter primenjen
 
     val currentUser = authViewModel.getCurrentUser()
+
+    val eventsState by eventViewModel.events.collectAsState()
+    var selectedEvent by remember { mutableStateOf<Event?>(null) }
+
+    // Preuzmite ID događaja iz savedStateHandle
+    val eventId = navController.currentBackStackEntry?.savedStateHandle?.get<String>("eventId")
+
+    Log.d("HomePage", "eventId: $eventId")
+    LaunchedEffect(eventId) {
+        if (eventId != null) {
+            // Učitajte podatke vezane za eventId
+            Log.d("HomePage", "Loading data for Event ID: $eventId")
+        }
+    }
+
+    if (eventId != null) {
+        when (eventsState) {
+            is Resource.Success -> {
+                selectedEvent = (eventsState as Resource.Success).result.find { event -> event.id == eventId }
+            }
+            is Resource.Loading -> {
+                // Prikazivanje loading indikatora
+                CircularProgressIndicator()
+            }
+            is Resource.Failure -> {
+                // Prikazivanje poruke o grešci
+                val errorMessage = (eventsState as Resource.Failure).exception.message
+                Text(text = "Greška: $errorMessage", color = Color.Red)
+            }
+        }
+    }
 
 
     Column(

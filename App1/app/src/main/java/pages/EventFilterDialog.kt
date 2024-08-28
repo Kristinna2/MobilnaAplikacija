@@ -116,7 +116,7 @@ fun EventFilterDialog(
                     expanded = isEventNameDropdownExpanded,
                     onDismissRequest = { isEventNameDropdownExpanded = false }
                 ) {
-                    eventsState.forEach { event:Event ->
+                    eventsState.filter { it.eventName.isNotEmpty() }.forEach { event: Event ->
                         DropdownMenuItem(
                             onClick = {
                                 ChooseEventName = event.eventName // Pretpostavljamo da event ima naziv
