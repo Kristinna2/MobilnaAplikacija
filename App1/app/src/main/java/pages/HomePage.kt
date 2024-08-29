@@ -120,8 +120,8 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
                     super.onLocationResult(locationResult)
                     locationResult.locations.forEach { location ->
                         Log.d("HomePage", "Updated Location: ${location.latitude}, ${location.longitude}")
-                    currentLocation.value = LatLng(location.latitude, location.longitude)                    }
-                  //    currentLocation.value = LatLng(37.3500000, -122.1500000)}
+                   // currentLocation.value = LatLng(location.latitude, location.longitude)                    }
+                      currentLocation.value = LatLng(37.3400000, -122.1500000)}
 
                 }
             }, null)

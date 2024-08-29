@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
+import com.example.app1.AuthViewModel
 import com.example.app1.EventViewModel
 import com.example.app1.Resource
 import com.google.android.gms.maps.model.LatLng
@@ -52,7 +53,7 @@ import com.google.firebase.auth.auth
 fun EventDetailsPage(navController: NavController) {
     val eventViewModel: EventViewModel = viewModel()
     //  val location: MutableState<LatLng?>
-
+val authviewmodel:AuthViewModel= viewModel()
 
     val eventTypes = listOf("Concert", "Sports Event", "Manifestation", "Natural Disaster")
     var selectedEventType by remember { mutableStateOf("") }
@@ -81,8 +82,11 @@ fun EventDetailsPage(navController: NavController) {
         location.value = receivedLocation
     }
 
-    val currentUser= Firebase.auth.currentUser
+
+ //   val currentUser= Firebase.auth.currentUser
+    val currentUser=authviewmodel.getCurrentUser()
     val userId=currentUser?.uid?:"Unknown"
+
 
 
     val scrollState = rememberScrollState()
@@ -94,7 +98,9 @@ fun EventDetailsPage(navController: NavController) {
     ) {
         Button(
             onClick = { navController.navigateUp() }, // Navigira unazad
-            modifier = Modifier.padding(bottom = 16.dp).align(Alignment.Start)
+            modifier = Modifier
+                .padding(bottom = 16.dp)
+                .align(Alignment.Start)
         ) {
             Text(text = "Back")
         }
@@ -195,7 +201,7 @@ fun EventDetailsPage(navController: NavController) {
                     eventName = eventName.value.text,
                     eventType = selectedEventType,
                     description = additionalDetails.value.text,
-                    crowd = crowdLevel.value,
+                    crowdLevel = crowdLevel.value,
                     mainImage = imageUri!!,
                     galleryImages = emptyList(),
                     location =location.value

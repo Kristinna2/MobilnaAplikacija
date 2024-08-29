@@ -1,6 +1,7 @@
 package com.example.app1
 
 
+import pages.AllEventsPage
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost

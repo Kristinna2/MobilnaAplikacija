@@ -113,7 +113,7 @@ class EventViewModel: ViewModel() {
        eventType: String,
        eventName: String,
        description: String,
-       crowd: Int,
+       crowdLevel: Int,
        mainImage: Uri,
        galleryImages: List<Uri>,
        location: LatLng?
@@ -128,7 +128,7 @@ class EventViewModel: ViewModel() {
                    "eventType" to eventType,
                    "eventName" to eventName,
                    "description" to description,
-                   "crowd" to crowd,
+                   "crowdLevel" to crowdLevel,
                    "mainImage" to uri.toString(),
                    "galleryImages" to galleryImages.map { it.toString() },
                    "location" to location?.let { GeoPoint(it.latitude, it.longitude) }
