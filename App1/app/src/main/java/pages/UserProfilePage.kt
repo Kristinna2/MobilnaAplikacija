@@ -12,8 +12,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -47,12 +50,10 @@ fun UserProfilePage(
     var lastName by remember { mutableStateOf<String?>(null) }
     var phoneNumber by remember { mutableStateOf<String?>(null) }
     var photoUrl by remember { mutableStateOf<String?>(null) }
-  //  var totalRatings by remember { mutableStateOf(0) } // Total ratings sum
-
     var points by remember { mutableStateOf<Int?>(null) }
 
     val eventViewModel: EventViewModel = viewModel()
-    var events by remember { mutableStateOf<List<Event>>(emptyList()) } // List of user's events
+    var events by remember { mutableStateOf<List<Event>>(emptyList()) }
 
     // Fetch user data and ratings
     LaunchedEffect(userId) {
@@ -66,7 +67,6 @@ fun UserProfilePage(
                     phoneNumber = document.getString("phoneNumber")
                     photoUrl = document.getString("photoUrl")
                     points = document.getLong("points")?.toInt()
-
                 }
             }
 
@@ -74,8 +74,6 @@ fun UserProfilePage(
             eventViewModel.filterEventsByUserId(id) { userEvents ->
                 events = userEvents
             }
-
-
         }
     }
 
@@ -87,7 +85,7 @@ fun UserProfilePage(
             .fillMaxSize()
             .background(Color(0xFFbce6f6))
             .padding(16.dp)
-            .verticalScroll(scrollState), // Enable scrolling
+            .verticalScroll(scrollState),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -140,14 +138,11 @@ fun UserProfilePage(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-
         Text(
             text = "Points: ${points ?: "Nije bilo interakcije"}",
             fontSize = 24.sp,
             color = Color.Red
         )
-
-        Spacer(modifier = Modifier.height(32.dp))
 
         Spacer(modifier = Modifier.height(32.dp))
 
@@ -162,12 +157,30 @@ fun UserProfilePage(
         Spacer(modifier = Modifier.height(16.dp))
 
         events.forEach { event ->
-            Column(
-                modifier = Modifier.padding(vertical = 8.dp)
+            Card(
+                modifier = Modifier
+                    .padding(vertical = 8.dp)
+                    .fillMaxSize(),
+                shape = RoundedCornerShape(8.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
             ) {
-                Text(text = "Name: ${event.eventName}", fontSize = 20.sp, color = Color.Black)
-                Text(text = "Description: ${event.description}", fontSize = 16.sp, color = Color.Gray)
-                Spacer(modifier = Modifier.height(8.dp))
+                Column(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Text(
+                        text = event.eventName,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = event.description!!,
+                        fontSize = 16.sp,
+                        color = Color.Gray
+                    )
+                }
             }
         }
 

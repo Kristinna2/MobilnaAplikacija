@@ -63,11 +63,12 @@ fun DetailsPage(
     eventViewModel: EventViewModel = viewModel(factory = EventViewModelFactory()),
 ) {
 
-
     val viewModel: AuthViewModel = viewModel()
     val  usersViewModel: UsersViewModel = viewModel() // Inicijalizacija UsersViewModel
     val ratesResources = eventViewModel.rates.collectAsState()
     val newRateResource = eventViewModel.newRate.collectAsState()
+
+
 
     val markerDataJson = navController.previousBackStackEntry
         ?.savedStateHandle
@@ -94,13 +95,12 @@ fun DetailsPage(
 
     var userName by remember { mutableStateOf("") }
 
-    // Uzimamo userId i dohvatamo ime korisnika
+
     markerData?.userId?.let { userId ->
         usersViewModel.users.collectAsState().value.find { user -> user.id == userId }?.let { user ->
             userName = "${user.firstName} ${user.lastName}"
         }
     }
-
 
 
     val rates = remember { mutableStateListOf<Rate>() }
@@ -117,6 +117,8 @@ fun DetailsPage(
 
 
     val userId = viewModel.getCurrentUser()?.uid
+
+
 
     Column(
         modifier = Modifier
