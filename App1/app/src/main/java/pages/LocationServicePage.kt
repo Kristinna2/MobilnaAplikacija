@@ -25,7 +25,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.app1.LocationService
+import com.example.app1.location.LocationService
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable

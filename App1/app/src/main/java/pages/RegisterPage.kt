@@ -49,8 +49,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import com.example.app1.AuthState
-import com.example.app1.AuthViewModel
+import com.example.app1.views.AuthState
+import com.example.app1.views.AuthViewModel
 
 @Composable
 fun RegisterPage(

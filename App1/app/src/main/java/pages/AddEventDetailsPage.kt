@@ -42,18 +42,16 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
-import com.example.app1.AuthViewModel
-import com.example.app1.EventViewModel
+import com.example.app1.views.AuthViewModel
+import com.example.app1.views.EventViewModel
 import com.example.app1.Resource
 import com.google.android.gms.maps.model.LatLng
-import com.google.firebase.Firebase
-import com.google.firebase.auth.auth
 
 @Composable
 fun EventDetailsPage(navController: NavController) {
     val eventViewModel: EventViewModel = viewModel()
     //  val location: MutableState<LatLng?>
-val authviewmodel:AuthViewModel= viewModel()
+val authviewmodel: AuthViewModel = viewModel()
 
     val eventTypes = listOf("Concert", "Sports Event", "Manifestation", "Natural Disaster")
     var selectedEventType by remember { mutableStateOf("") }

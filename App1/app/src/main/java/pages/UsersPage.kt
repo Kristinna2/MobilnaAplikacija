@@ -32,9 +32,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.app1.Event
-import com.example.app1.EventViewModel
-import com.example.app1.User
-import com.example.app1.UsersViewModel
+import com.example.app1.views.EventViewModel
+import com.example.app1.views.User
+import com.example.app1.views.UsersViewModel
 
 @Composable
 fun UsersPage(
@@ -102,7 +102,7 @@ fun UsersPage(
 }
 
 @Composable
-fun UserItem(user: User, onFetchEvents: (String) -> Unit,    isTopUser: Boolean,
+fun UserItem(user: User, onFetchEvents: (String) -> Unit, isTopUser: Boolean,
              navController:NavController) {
     Row(
         modifier = Modifier

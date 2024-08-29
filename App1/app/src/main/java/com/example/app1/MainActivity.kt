@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
 import com.example.app1.ui.theme.App1Theme
+import com.example.app1.views.AuthViewModel
 
 class MainActivity : ComponentActivity() {
 

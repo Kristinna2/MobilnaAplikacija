@@ -45,14 +45,14 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import com.example.app1.AuthViewModel
+import com.example.app1.views.AuthViewModel
 import com.example.app1.Event
-import com.example.app1.EventViewModel
-import com.example.app1.EventViewModelFactory
-import com.example.app1.Marker
+import com.example.app1.views.EventViewModel
+import com.example.app1.views.EventViewModelFactory
+import com.example.app1.views.Marker
 import com.example.app1.Rate
 import com.example.app1.Resource
-import com.example.app1.UsersViewModel
+import com.example.app1.views.UsersViewModel
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.gson.Gson
 import java.math.RoundingMode
@@ -62,13 +62,19 @@ fun DetailsPage(
     navController: NavController,
     eventViewModel: EventViewModel = viewModel(factory = EventViewModelFactory()),
 ) {
+
+
+    val viewModel: AuthViewModel = viewModel()
+    val  usersViewModel: UsersViewModel = viewModel() // Inicijalizacija UsersViewModel
+    val ratesResources = eventViewModel.rates.collectAsState()
+    val newRateResource = eventViewModel.newRate.collectAsState()
+
     val markerDataJson = navController.previousBackStackEntry
         ?.savedStateHandle
         ?.get<String>("markerData")
 
     val markerData = Gson().fromJson(markerDataJson, Marker::class.java)
 
-    val viewModel: AuthViewModel = viewModel()
 
 
     val event: Event = markerData?.let {
@@ -85,7 +91,6 @@ fun DetailsPage(
         )
     } ?: Event()
 
-    val  usersViewModel: UsersViewModel = viewModel() // Inicijalizacija UsersViewModel
 
     var userName by remember { mutableStateOf("") }
 
@@ -96,8 +101,6 @@ fun DetailsPage(
         }
     }
 
-    val ratesResources = eventViewModel.rates.collectAsState()
-    val newRateResource = eventViewModel.newRate.collectAsState()
 
 
     val rates = remember { mutableStateListOf<Rate>() }
@@ -111,6 +114,8 @@ fun DetailsPage(
             eventViewModel.getEventDetail(event.id)  // Poziv funkcije
         }
     }
+
+
     val userId = viewModel.getCurrentUser()?.uid
 
     Column(

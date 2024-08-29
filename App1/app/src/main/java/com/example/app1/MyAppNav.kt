@@ -1,13 +1,15 @@
 package com.example.app1
 
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import pages.AllEventsPage
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import pages.AllEventsPage
+import com.example.app1.views.AuthViewModel
 import pages.DetailsPage
 import pages.EventDetailsPage
 import pages.HomePage
@@ -17,6 +19,7 @@ import pages.RegisterPage
 import pages.UserProfilePage
 import pages.UsersPage
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun MyAppNavigation(modifier: Modifier = Modifier,authViewModel: AuthViewModel) {
     val navController = rememberNavController()

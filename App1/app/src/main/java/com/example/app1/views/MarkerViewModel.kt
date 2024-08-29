@@ -1,4 +1,4 @@
-package com.example.app1
+package com.example.app1.views
 
 import android.content.Context
 import android.util.Log
@@ -7,12 +7,17 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
+import com.example.app1.Event
 import com.google.firebase.firestore.DocumentId
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.firestore.ListenerRegistration
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlin.math.atan2
+import kotlin.math.cos
+import kotlin.math.sin
+import kotlin.math.sqrt
 
 data class Marker(
     @DocumentId val id: String = "",
@@ -119,8 +124,14 @@ fun getUserIdByNameFromFirestore(firstName: String, lastName: String, onResult: 
         }
 }
 
-    fun filterMarkers(category: String,eventName: String, crowdLevel: Int) {
+    fun filterMarkers(category: String,eventName: String, crowdLevel: Int, radius: Float, centerPoint: GeoPoint) {
+        val radiusInMeters = radius * 1000 // Convert km to meters
+
+
         val filtered = _markers.value?.filter { marker ->
+
+            val markerLocation = marker.location
+            val distance = calculateDistance(centerPoint.latitude, centerPoint.longitude, markerLocation.latitude, markerLocation.longitude)
 
             // Proveravamo da li marker odgovara kategoriji
             val matchesCategory = (category != "Select Category" && marker.eventType == category)
@@ -130,11 +141,12 @@ fun getUserIdByNameFromFirestore(firstName: String, lastName: String, onResult: 
             val matchesCrowdLevel = (crowdLevel != 0 && marker.crowdLevel == crowdLevel)
             Log.d("MarkerViewModel","crowd:${marker.crowdLevel}")
 
+            val withinRadius = distance <= radiusInMeters
 
 
 
             // Na osnovu uslova se koristi logički "I"
-            matchesCategory || matchesEventName || matchesCrowdLevel  // Svi uslovi se povezuju sa logičkim "ILI"
+            matchesCategory || matchesEventName || matchesCrowdLevel|| withinRadius  // Svi uslovi se povezuju sa logičkim "ILI"
         } ?: emptyList()
 
         // Postavljamo filtrirane markere
@@ -180,6 +192,20 @@ fun getUserIdByNameFromFirestore(firstName: String, lastName: String, onResult: 
         markerListenerRegistration?.remove()
     }
 
+    private fun calculateDistance(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
+        val earthRadius = 6371000.0 // Correct Earth radius in meters
+
+        val dLat = Math.toRadians(lat2 - lat1)
+        val dLon = Math.toRadians(lon2 - lon1)
+
+        val a = sin(dLat / 2) * sin(dLat / 2) +
+                cos(Math.toRadians(lat1)) * cos(Math.toRadians(lat2)) *
+                sin(dLon / 2) * sin(dLon / 2)
+
+        val c = 2 * atan2(sqrt(a), sqrt(1 - a))
+
+        return earthRadius * c
+    }
     private fun convertFilteredEventsToMarkers(events: List<Event>): List<Marker> {
         return events.map { event ->
             Marker(

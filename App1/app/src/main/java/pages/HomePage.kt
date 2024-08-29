@@ -54,18 +54,20 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.app1.AuthState
-import com.example.app1.AuthViewModel
 import com.example.app1.Event
-import com.example.app1.EventViewModel
-import com.example.app1.MarkerViewModel
+
 import com.example.app1.Resource
+import com.example.app1.views.AuthState
+import com.example.app1.views.AuthViewModel
+import com.example.app1.views.EventViewModel
+import com.example.app1.views.MarkerViewModel
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MapStyleOptions
+import com.google.firebase.firestore.GeoPoint
 import com.google.gson.Gson
 import com.google.maps.android.compose.Circle
 import com.google.maps.android.compose.GoogleMap
@@ -98,7 +100,7 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
         priority = com.google.android.gms.location.LocationRequest.PRIORITY_HIGH_ACCURACY
     }
 
-   // val savedStateHandle = navController.currentBackStackEntry?.savedStateHandle
+    // val savedStateHandle = navController.currentBackStackEntry?.savedStateHandle
 
     // Handle new markers
     LaunchedEffect(Unit) {
@@ -110,7 +112,7 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
             }
     }
 
-   // val markers by homeViewModel.markers.collectAsState(initial = emptyList())
+    // val markers by homeViewModel.markers.collectAsState(initial = emptyList())
     val markers by markerViewModel.markers.collectAsState()
 
     LaunchedEffect(Unit) {
@@ -120,8 +122,8 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
                     super.onLocationResult(locationResult)
                     locationResult.locations.forEach { location ->
                         Log.d("HomePage", "Updated Location: ${location.latitude}, ${location.longitude}")
-                   // currentLocation.value = LatLng(location.latitude, location.longitude)                    }
-                      currentLocation.value = LatLng(37.3400000, -122.1500000)}
+                        // currentLocation.value = LatLng(location.latitude, location.longitude)                    }
+                        currentLocation.value = LatLng(37.3400000, -122.1500000)}
 
                 }
             }, null)
@@ -149,7 +151,7 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
         }
     }
 
-  //  val markers = remember { mutableStateListOf<Pair<LatLng, String>>() }
+    //  val markers = remember { mutableStateListOf<Pair<LatLng, String>>() }
     var selectedMarker by remember { mutableStateOf<LatLng?>(null) }
     val markerName = remember { mutableStateOf(TextFieldValue("")) }
 
@@ -169,7 +171,8 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
 
     if (showFilterDialog) {
         EventFilterDialog(
-            onDismiss = { showFilterDialog = false }
+            onDismiss = { showFilterDialog = false },
+            centerPoint = currentLocation.value?.let { GeoPoint(it.latitude, it.longitude) } ?: GeoPoint(0.0, 0.0) // Default center point
         )
     }
     if (showDialog) {
@@ -329,103 +332,103 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
                 color = Color.White
             )
         }
-            // Search bar
+        // Search bar
 
-            Box(
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(8.dp)
+                .weight(1f) // Povećaj visinu mape
+        ) {
+            TextField(
+                value = searchQuery.value.text,
+                onValueChange = { newValue ->
+                    searchQuery.value = TextFieldValue(newValue)
+                },
+                placeholder = { Text(text = "Search...") },
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(8.dp)
-                    .weight(1f) // Povećaj visinu mape
-            ) {
-                TextField(
-                    value = searchQuery.value.text,
-                    onValueChange = { newValue ->
-                        searchQuery.value = TextFieldValue(newValue)
-                    },
-                    placeholder = { Text(text = "Search...") },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                        .align(Alignment.TopCenter)
-                        .background(Color.White, RoundedCornerShape(8.dp)) // Dodaj pozadinsku boju i zaobljenje
-                        .border(1.dp, Color.Gray, RoundedCornerShape(8.dp)) // Dodaj border za bolju vidljivost
-                        .zIndex(1f), // Postavi TextField iznad mape
-                    maxLines = 1,
-                    singleLine = true,
-                    colors = TextFieldDefaults.colors(
-                        focusedTextColor = Color.Black,
-                        unfocusedTextColor = Color.Black,
-                        focusedContainerColor = Color.Transparent,
-                        unfocusedContainerColor = Color.Transparent,
-                        cursorColor = Color.Black,
-                        focusedPlaceholderColor = Color.Gray,
-                        unfocusedPlaceholderColor = Color.Gray,
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent
-                    )
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .align(Alignment.TopCenter)
+                    .background(Color.White, RoundedCornerShape(8.dp)) // Dodaj pozadinsku boju i zaobljenje
+                    .border(1.dp, Color.Gray, RoundedCornerShape(8.dp)) // Dodaj border za bolju vidljivost
+                    .zIndex(1f), // Postavi TextField iznad mape
+                maxLines = 1,
+                singleLine = true,
+                colors = TextFieldDefaults.colors(
+                    focusedTextColor = Color.Black,
+                    unfocusedTextColor = Color.Black,
+                    focusedContainerColor = Color.Transparent,
+                    unfocusedContainerColor = Color.Transparent,
+                    cursorColor = Color.Black,
+                    focusedPlaceholderColor = Color.Gray,
+                    unfocusedPlaceholderColor = Color.Gray,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent
                 )
-                val markersToDisplay = if (isFilterApplied) {
-                    filteredMarkers // Prikazujemo filtrirane markere
-                } else {
-                    markers // Prikazujemo sve markere
+            )
+            val markersToDisplay = if (isFilterApplied) {
+                filteredMarkers // Prikazujemo filtrirane markere
+            } else {
+                markers // Prikazujemo sve markere
+            }
+
+            GoogleMap(
+                modifier = Modifier.fillMaxSize(),
+                cameraPositionState = cameraPositionState,
+                onMapClick = { latLng ->
+                    if (!isFilterButtonPressed) {
+                        selectedMarker = latLng
+                        showDialog = true
+                        isMarkerButtonPressed=true
+                    }
+                }
+            ) {
+                currentLocation.value?.let {
+                    Circle(
+                        center = it,
+                        radius = 50.0, // Promenite veličinu po potrebi
+                        fillColor = Color.Blue.copy(alpha = 0.5f), // Boja kružića
+                        strokeColor = Color.Blue,
+                        strokeWidth = 2f
+                    )
+                    Marker(
+                        state = MarkerState(position = it),
+                        title = "My Location",
+                        icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)
+                    )
                 }
 
-                GoogleMap(
-                    modifier = Modifier.fillMaxSize(),
-                    cameraPositionState = cameraPositionState,
-                    onMapClick = { latLng ->
-                        if (!isFilterButtonPressed) {
-                            selectedMarker = latLng
-                            showDialog = true
-                            isMarkerButtonPressed=true
-                        }
-                    }
-                ) {
-                    currentLocation.value?.let {
-                        Circle(
-                            center = it,
-                            radius = 50.0, // Promenite veličinu po potrebi
-                            fillColor = Color.Blue.copy(alpha = 0.5f), // Boja kružića
-                            strokeColor = Color.Blue,
-                            strokeWidth = 2f
-                        )
+                markersToDisplay.filter { it.eventName.contains(searchQuery.value.text, ignoreCase = true) }
+                    .forEach { marker ->
                         Marker(
-                            state = MarkerState(position = it),
-                            title = "My Location",
-                            icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)
+                            state = MarkerState(
+                                position = LatLng(
+                                    marker.location.latitude,
+                                    marker.location.longitude
+                                )
+                            ),
+                            title = marker.eventName,
+                            icon = if (selectedColor == null || selectedColor == Color.Red) {
+                                BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)
+                            } else {
+                                BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)
+                            },
+                            onClick = {
+                                it.showInfoWindow()
+
+                                val markerJson = Gson().toJson(marker)
+                                navController.currentBackStackEntry?.savedStateHandle?.set(
+                                    "markerData",
+                                    markerJson
+                                )
+                                navController.navigate("details")
+                                true
+                            }
+
                         )
                     }
-
-                    markersToDisplay.filter { it.eventName.contains(searchQuery.value.text, ignoreCase = true) }
-                        .forEach { marker ->
-                            Marker(
-                                state = MarkerState(
-                                    position = LatLng(
-                                        marker.location.latitude,
-                                        marker.location.longitude
-                                    )
-                                ),
-                                title = marker.eventName,
-                                icon = if (selectedColor == null || selectedColor == Color.Red) {
-                                    BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)
-                                } else {
-                                    BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)
-                                },
-                                onClick = {
-                                    it.showInfoWindow()
-
-                                    val markerJson = Gson().toJson(marker)
-                                    navController.currentBackStackEntry?.savedStateHandle?.set(
-                                        "markerData",
-                                        markerJson
-                                    )
-                                      navController.navigate("details")
-                                    true
-                                }
-
-                            )
-                        }
-                }
+            }
 
         }
         Box(
@@ -441,8 +444,9 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
                     onClick = {
 
                         isMarkerButtonPressed=false
-                            isFilterButtonPressed = true
-                            showDialog = true
+                        isFilterButtonPressed = true
+                        showFilterDialog = true // Show filter dialog
+
 
 
                     },
@@ -462,15 +466,7 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
                         color = Color.White
                     )
                 }
-                if (showDialog && !isMarkerButtonPressed) {
 
-                        EventFilterDialog(
-                            onDismiss = { showDialog = false },
-                            eventViewModel,
-                            usersViewModel = viewModel()
-                        )
-
-                }
                 Button(
                     onClick = {
                         val location = currentLocation.value

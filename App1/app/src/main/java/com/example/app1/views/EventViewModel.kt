@@ -1,4 +1,4 @@
-package com.example.app1
+package com.example.app1.views
 
 
 import android.net.Uri
@@ -9,6 +9,11 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.example.app1.Event
+import com.example.app1.EventRepositoryImplementation
+import com.example.app1.Rate
+import com.example.app1.RateRepositoryImpl
+import com.example.app1.Resource
 import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.GeoPoint

@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -20,16 +21,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.app1.Event
-import com.example.app1.EventViewModel
-import com.example.app1.MarkerViewModel
+import com.example.app1.views.EventViewModel
+import com.example.app1.views.MarkerViewModel
 import com.example.app1.Resource
-import com.example.app1.User
-import com.example.app1.UsersViewModel
+import com.example.app1.views.User
+import com.example.app1.views.UsersViewModel
+import com.google.firebase.firestore.GeoPoint
 
 
 @Composable
 fun EventFilterDialog(
     onDismiss: () -> Unit,
+    centerPoint: GeoPoint, // Added center point parameter
+
     eventViewModel: EventViewModel = viewModel(),
     usersViewModel: UsersViewModel = viewModel() // Dodajemo ViewModel kao parametar
 ) {
@@ -41,8 +45,10 @@ fun EventFilterDialog(
     val usersState by usersViewModel.users.collectAsState()
     var isCrowdLevelDropdownExpanded by remember { mutableStateOf(false) }
     var selectedCrowdLevel by remember { mutableStateOf(0) }
-
     var Category by remember { mutableStateOf("Select Category") }
+    var radius by remember { mutableStateOf(1f) } // Initialize with a default value
+
+
 
     // Prikupite podatke o događajima
     val eventsResource by eventViewModel.events.collectAsState()
@@ -173,6 +179,16 @@ fun EventFilterDialog(
                         )
                     }
                 }
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Slider for radius
+                Text(text = "Radius: ${radius.toInt()} km")
+                Slider(
+                    value = radius,
+                    onValueChange = { newRadius -> radius = newRadius },
+                    valueRange = 1f..50f, // Example range for radius
+                    steps = 49 // Number of steps between min and max value
+                )
             }
         },
         confirmButton = {
@@ -185,7 +201,7 @@ fun EventFilterDialog(
                 }
             }
             else {
-                markerViewModel.filterMarkers(Category, ChooseEventName, selectedCrowdLevel)
+                markerViewModel.filterMarkers(Category, ChooseEventName, selectedCrowdLevel,radius, centerPoint)
 
             }
                 onDismiss() // Zatvori dijalog nakon filtriranja

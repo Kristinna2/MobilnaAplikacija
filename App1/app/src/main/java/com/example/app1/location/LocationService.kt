@@ -1,4 +1,4 @@
-package com.example.app1
+package com.example.app1.location
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -22,7 +22,6 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
