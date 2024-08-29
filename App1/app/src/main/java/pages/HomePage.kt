@@ -86,6 +86,7 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
     val markerViewModel: MarkerViewModel = viewModel(
         factory = MarkerViewModelFactory(context)
     )
+
     var newMarker by remember { mutableStateOf<Pair<LatLng, String>?>(null) }
 
     val currentLocation = remember { mutableStateOf<LatLng?>(null) }
@@ -120,7 +121,7 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
                     locationResult.locations.forEach { location ->
                         Log.d("HomePage", "Updated Location: ${location.latitude}, ${location.longitude}")
                     currentLocation.value = LatLng(location.latitude, location.longitude)                    }
-                   //   currentLocation.value = LatLng(37.3800000, -122.1600000)}
+                  //    currentLocation.value = LatLng(37.3500000, -122.1500000)}
 
                 }
             }, null)
@@ -135,6 +136,8 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
             else -> Unit
         }
     }
+
+
 
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(LatLng(0.0, 0.0), 15f)
@@ -163,6 +166,7 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
     var isMarkerButtonPressed by remember { mutableStateOf(false) }
 
     var showFilterDialog by remember { mutableStateOf(false) }
+
     if (showFilterDialog) {
         EventFilterDialog(
             onDismiss = { showFilterDialog = false }

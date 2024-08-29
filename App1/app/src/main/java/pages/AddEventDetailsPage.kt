@@ -45,6 +45,8 @@ import coil.compose.rememberAsyncImagePainter
 import com.example.app1.EventViewModel
 import com.example.app1.Resource
 import com.google.android.gms.maps.model.LatLng
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 
 @Composable
 fun EventDetailsPage(navController: NavController) {
@@ -79,6 +81,8 @@ fun EventDetailsPage(navController: NavController) {
         location.value = receivedLocation
     }
 
+    val currentUser= Firebase.auth.currentUser
+    val userId=currentUser?.uid?:"Unknown"
 
 
     val scrollState = rememberScrollState()
@@ -187,6 +191,7 @@ fun EventDetailsPage(navController: NavController) {
                 showedAlert.value = false
                 buttonIsLoading.value = true
                 eventViewModel?.saveEventData(
+                    userId=userId,
                     eventName = eventName.value.text,
                     eventType = selectedEventType,
                     description = additionalDetails.value.text,

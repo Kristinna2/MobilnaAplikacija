@@ -109,6 +109,7 @@ class EventViewModel: ViewModel() {
     }
 */
    fun saveEventData(
+       userId:String,
        eventType: String,
        eventName: String,
        description: String,
@@ -122,7 +123,8 @@ class EventViewModel: ViewModel() {
 
        uploadTask.addOnSuccessListener {
            storageRef.downloadUrl.addOnSuccessListener { uri ->
-               val landmarkData = hashMapOf(
+               val eventData = hashMapOf(
+                   "userId" to userId,
                    "eventType" to eventType,
                    "eventName" to eventName,
                    "description" to description,
@@ -133,11 +135,11 @@ class EventViewModel: ViewModel() {
                )
 
                // Spremi landmarkData u bazu podataka
-               Firebase.firestore.collection("landmarks")
-                   .add(landmarkData)
+               Firebase.firestore.collection("events")
+                   .add(eventData)
                    .addOnSuccessListener {
                        // Uspješno spremljeno
-                       _eventFlow.value = Resource.Success("Landmark successfully added!")
+                       _eventFlow.value = Resource.Success("Event successfully added!")
                    }
                    .addOnFailureListener {
                        // Greška prilikom spremanja
