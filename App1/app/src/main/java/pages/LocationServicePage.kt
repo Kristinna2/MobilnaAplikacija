@@ -119,20 +119,26 @@ fun LocationServicePage(modifier: Modifier = Modifier, navController: NavControl
                 )
                 Switch(
                     checked = checked.value,
-                    onCheckedChange = { isChecked ->
-                        checked.value = isChecked
-                        val serviceIntent = Intent(context, LocationService::class.java)
-
-                        if (isChecked) {
-                            serviceIntent.action = LocationService.ACTION_FIND_NEARBY
-                            context.startForegroundService(serviceIntent)
+                    onCheckedChange = {
+                        checked.value = it
+                        if (it) {
+                            Intent(context, LocationService::class.java).apply {
+                                action = LocationService.ACTION_FIND_NEARBY
+                                context.startForegroundService(this)
+                            }
                             with(sharedPreferences.edit()) {
                                 putBoolean("tracking_location", true)
                                 apply()
                             }
                         } else {
-                            serviceIntent.action = LocationService.ACTION_STOP
-                            context.startService(serviceIntent) // Start service to handle ACTION_STOP
+                            Intent(context, LocationService::class.java).apply {
+                                action = LocationService.ACTION_STOP
+                                context.stopService(this)
+                            }
+                            Intent(context, LocationService::class.java).apply {
+                                action = LocationService.ACTION_START
+                                context.startForegroundService(this)
+                            }
                             with(sharedPreferences.edit()) {
                                 putBoolean("tracking_location", false)
                                 apply()

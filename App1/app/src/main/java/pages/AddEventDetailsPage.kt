@@ -49,9 +49,9 @@ import com.google.android.gms.maps.model.LatLng
 
 @Composable
 fun EventDetailsPage(navController: NavController) {
+
     val eventViewModel: EventViewModel = viewModel()
-    //  val location: MutableState<LatLng?>
-val authviewmodel: AuthViewModel = viewModel()
+    val authviewmodel: AuthViewModel = viewModel()
 
     val eventTypes = listOf("Concert", "Sports Event", "Manifestation", "Natural Disaster")
     var selectedEventType by remember { mutableStateOf("") }
@@ -61,7 +61,7 @@ val authviewmodel: AuthViewModel = viewModel()
     var imageUri by remember { mutableStateOf<Uri?>(null) }
     val buttonIsLoading = remember { mutableStateOf(false) }
     val showedAlert = remember { mutableStateOf(false) }
-    val eventFlow = eventViewModel?.eventFlow?.collectAsState(initial = null)?.value
+    val eventFlow = eventViewModel.eventFlow.collectAsState(initial = null).value
     var galleryImages by remember { mutableStateOf<List<Uri>>(emptyList()) }
 
 
@@ -71,6 +71,7 @@ val authviewmodel: AuthViewModel = viewModel()
     ) { uri: Uri? ->
         imageUri = uri
     }
+
     val location = remember { mutableStateOf<LatLng?>(null) }
     val savedStateHandle = navController.previousBackStackEntry?.savedStateHandle
 
@@ -81,7 +82,6 @@ val authviewmodel: AuthViewModel = viewModel()
     }
 
 
- //   val currentUser= Firebase.auth.currentUser
     val currentUser=authviewmodel.getCurrentUser()
     val userId=currentUser?.uid?:"Unknown"
 
@@ -95,7 +95,7 @@ val authviewmodel: AuthViewModel = viewModel()
             .padding(16.dp)
     ) {
         Button(
-            onClick = { navController.navigateUp() }, // Navigira unazad
+            onClick = { navController.navigateUp() },
             modifier = Modifier
                 .padding(bottom = 16.dp)
                 .align(Alignment.Start)
@@ -110,7 +110,6 @@ val authviewmodel: AuthViewModel = viewModel()
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
-        // Event Type Selection
         Text(text = "Select Event Type", fontWeight = FontWeight.Bold)
         eventTypes.forEach { eventType ->
             Row(
@@ -127,7 +126,6 @@ val authviewmodel: AuthViewModel = viewModel()
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Event Name Input
         TextField(
             value = eventName.value,
             onValueChange = { eventName.value = it },
@@ -137,7 +135,6 @@ val authviewmodel: AuthViewModel = viewModel()
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Additional Details and Crowd Level for all events
         TextField(
             value = additionalDetails.value,
             onValueChange = { additionalDetails.value = it },
@@ -145,7 +142,7 @@ val authviewmodel: AuthViewModel = viewModel()
                 if (selectedEventType == "Natural Disaster") {
                     Text("How did it occur?")
                 } else {
-                    Text("Describe the situation, crowd...")
+                    Text("Describe the situation...")
                 }
             },
             modifier = Modifier.fillMaxWidth()
@@ -166,7 +163,6 @@ val authviewmodel: AuthViewModel = viewModel()
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Add Photo
         Box(
             modifier = Modifier
                 .size(150.dp)
@@ -189,7 +185,6 @@ val authviewmodel: AuthViewModel = viewModel()
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        // Submit Button
         Button(
             onClick = {
                 showedAlert.value = false
@@ -219,7 +214,7 @@ val authviewmodel: AuthViewModel = viewModel()
                 Text(text = "Submit")
             }
 
-            Spacer(modifier = Modifier.height(8.dp)) // Opcionalno, ako želite dodatni razmak
+            Spacer(modifier = Modifier.height(8.dp))
 
         }
 
@@ -231,12 +226,10 @@ val authviewmodel: AuthViewModel = viewModel()
                     val context = LocalContext.current
                     if (!showedAlert.value) {
                         showedAlert.value = true
-                        // Display error message (e.g., using Toast)
                         eventViewModel?.getAllEvents()
                     }
                 }
                 is Resource.Loading -> {
-                    // Handle loading state if necessary
                 }
                 is Resource.Success -> {
                     Log.d("EventFlow", it.toString())
@@ -244,7 +237,6 @@ val authviewmodel: AuthViewModel = viewModel()
                     val context = LocalContext.current
                     if (!showedAlert.value) {
                         showedAlert.value = true
-                        // Display success message (e.g., using Toast)
                         eventViewModel?.getAllEvents()
                     }
                 }

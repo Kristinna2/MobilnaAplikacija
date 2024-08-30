@@ -49,8 +49,8 @@ class EventViewModel: ViewModel() {
 
     private val _userEvents = MutableStateFlow<Resource<List<Event>>>(Resource.Success(emptyList()))
     val userEvents: StateFlow<Resource<List<Event>>> get() = _userEvents
-    private val _filteredEvents = MutableLiveData<Resource<List<Event>>>()
 
+    private val _filteredEvents = MutableLiveData<Resource<List<Event>>>()
     //   val filteredEvents: StateFlow<Resource<List<Event>>> get() = _filteredEvents
 
     private val _eventDetail = MutableStateFlow<Resource<Event>?>(null)
@@ -77,11 +77,9 @@ class EventViewModel: ViewModel() {
 
     }
 
-    // Izabrani događaj
     private val _selectedEvent = mutableStateOf<Event?>(null)
     val selectedEvent: State<Event?> get() = _selectedEvent
 
-    // Funkcija za postavljanje izabranog događaja
     fun setSelectedEvent(event: Event) {
         _selectedEvent.value = event
     }
@@ -139,7 +137,6 @@ class EventViewModel: ViewModel() {
                    "location" to location?.let { GeoPoint(it.latitude, it.longitude) }
                )
 
-               // Spremi landmarkData u bazu podataka
                Firebase.firestore.collection("events")
                    .add(eventData)
                    .addOnSuccessListener {
@@ -152,7 +149,6 @@ class EventViewModel: ViewModel() {
                    }
            }
        }.addOnFailureListener {
-           // Greška prilikom upload-a slike
            _eventFlow.value = Resource.Failure(it)
        }
    }
@@ -208,23 +204,19 @@ class EventViewModel: ViewModel() {
     }
 
     fun filterEventsByUserId(userId: String, onResult: (List<Event>) -> Unit) = viewModelScope.launch {
-        // Dohvata sve događaje
         val allEvents = when (val result = repository.getAllEvents()) {
             is Resource.Success -> result.result ?: emptyList()
             else -> emptyList()
         }
 
-        // Filtrira događaje koji odgovaraju `userId`
         val filteredList = allEvents.filter { event: Event ->
             Log.d("EventViewModel", "event.userId: ${event.userId}, userId: $userId") // Logovanje
 
             event.userId == userId
         }
 
-        // Ažurira stanje sa filtriranim događajima
         _filteredEvents.value = Resource.Success(filteredList)
 
-        // Vraćamo filtrirane događaje
         onResult(filteredList)
     }
 }

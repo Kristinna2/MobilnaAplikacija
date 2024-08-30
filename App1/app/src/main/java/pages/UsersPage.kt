@@ -41,9 +41,11 @@ fun UsersPage(
     viewModel: UsersViewModel = viewModel(),
     navController: NavController // Add the NavController as a parameter
 ) {
+
     val usersState = viewModel.users.collectAsState()
     val eventsState = remember { mutableStateMapOf<String, List<Event>>() }
-   val eventViewModel: EventViewModel = viewModel() // Make sure this is the correct ViewModel
+
+    val eventViewModel: EventViewModel = viewModel()
 
     val sortedUsers = usersState.value.sortedByDescending { it.points }
 
@@ -62,7 +64,6 @@ fun UsersPage(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // LazyColumn for displaying the list of users
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier.weight(1f)
@@ -70,9 +71,8 @@ fun UsersPage(
             items(sortedUsers) { user ->
                 UserItem(
                     user = user,
-                   isTopUser = sortedUsers.indexOf(user) < 3,
+                    isTopUser = sortedUsers.indexOf(user) < 3,
                     onFetchEvents = { userId ->
-                        // Fetch events for the selected user
                         eventViewModel.filterEventsByUserId(userId) { events ->
                             eventsState[userId] = events
                         }
@@ -87,7 +87,6 @@ fun UsersPage(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Back button to navigate to HomePage
         Button(
             onClick = { navController.navigate("home") },
             shape = CircleShape,
@@ -110,7 +109,6 @@ fun UserItem(user: User, onFetchEvents: (String) -> Unit, isTopUser: Boolean,
             .padding(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Display the profile picture if available
         Box(
             modifier = Modifier
                 .size(60.dp)

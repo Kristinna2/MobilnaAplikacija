@@ -60,11 +60,15 @@ import java.math.RoundingMode
 @Composable
 fun DetailsPage(
     navController: NavController,
-    eventViewModel: EventViewModel = viewModel(factory = EventViewModelFactory()),
+  //  eventViewModel: EventViewModel = viewModel(factory = EventViewModelFactory()),
 ) {
 
+    val  eventViewModel: EventViewModel = viewModel(factory = EventViewModelFactory())
     val viewModel: AuthViewModel = viewModel()
-    val  usersViewModel: UsersViewModel = viewModel() // Inicijalizacija UsersViewModel
+    val  usersViewModel: UsersViewModel = viewModel()
+    var userName by remember { mutableStateOf("") }
+    val userId = viewModel.getCurrentUser()?.uid
+
     val ratesResources = eventViewModel.rates.collectAsState()
     val newRateResource = eventViewModel.newRate.collectAsState()
 
@@ -93,7 +97,6 @@ fun DetailsPage(
     } ?: Event()
 
 
-    var userName by remember { mutableStateOf("") }
 
 
     markerData?.userId?.let { userId ->
@@ -111,12 +114,9 @@ fun DetailsPage(
 
     LaunchedEffect(event.id) {
         if (event.id.isNotEmpty()) {
-            eventViewModel.getEventDetail(event.id)  // Poziv funkcije
+            eventViewModel.getEventDetail(event.id)
         }
     }
-
-
-    val userId = viewModel.getCurrentUser()?.uid
 
 
 
@@ -155,7 +155,6 @@ fun DetailsPage(
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
 
-                    // Prikaz imena korisnika umesto userId
                     InfoBox(label = "User", value = userName)
                     InfoBox(label = "Event Type", value = marker.eventType)
                     InfoBox(label = "Description", value = marker.description)
@@ -256,8 +255,8 @@ fun DetailsPage(
                 },
                 isLoading = isLoading,
                 onRateConfirmed = { selectedRate ->
-                    myPrice.value = selectedRate // Ažuriranje ocene na stranici
-                    Log.d("DetailsPage", "Selected Rating: $selectedRate") // Logovanje ocene
+                    myPrice.value = selectedRate
+                    Log.d("DetailsPage", "Selected Rating: $selectedRate")
 
                 }
             )

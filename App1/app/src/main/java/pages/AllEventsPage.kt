@@ -113,7 +113,7 @@ fun EventRow(event: Event, navController: NavController) {
             modifier = Modifier
                 .padding(16.dp)
                 .fillMaxWidth()
-                .horizontalScroll(rememberScrollState()), // Dodato horizontalno skrolovanje
+                .horizontalScroll(rememberScrollState()),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Kolona za sliku
@@ -131,20 +131,18 @@ fun EventRow(event: Event, navController: NavController) {
                 )
             }
 
-            // Kolona za ime događaja
             Text(
                 text = event.eventName ?: "Unnamed Event",
                 style = MaterialTheme.typography.bodyLarge,
                 color = Color.Black,
                 modifier = Modifier
                     .padding(horizontal = 8.dp)
-                    .widthIn(min = 160.dp) // Postavi minimalnu širinu
-                    .padding(end = 8.dp), // Dodavanje razmaka između teksta i dugmeta
-                maxLines = 1, // Ograniči na 1 red
-                overflow = TextOverflow.Ellipsis // Dodaj prelivanje za dug tekst
+                    .widthIn(min = 160.dp)
+                    .padding(end = 8.dp),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
 
-            // Kolona za opis događaja
             Text(
                 text = event.description ?: "No description available",
                 style = MaterialTheme.typography.bodyMedium,
@@ -152,12 +150,11 @@ fun EventRow(event: Event, navController: NavController) {
                 fontSize = 14.sp,
                 modifier = Modifier
                     .padding(horizontal = 8.dp)
-                    .widthIn(min = 160.dp), // Postavi minimalnu širinu
-                maxLines = 1, // Ograniči na 1 red
-                overflow = TextOverflow.Ellipsis // Dodaj prelivanje za dug tekst
+                    .widthIn(min = 160.dp),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
 
-            // Kolona za crowd level
             Text(
                 text = "Crowd: ${event.crowdLevel ?: "Unknown"}",
                 style = MaterialTheme.typography.bodyMedium,
@@ -165,12 +162,11 @@ fun EventRow(event: Event, navController: NavController) {
                 fontSize = 14.sp,
                 modifier = Modifier
                     .padding(horizontal = 8.dp)
-                    .widthIn(min = 160.dp), // Postavi minimalnu širinu
-                maxLines = 1, // Ograniči na 1 red
-                overflow = TextOverflow.Ellipsis // Dodaj prelivanje za dug tekst
+                    .widthIn(min = 160.dp),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
 
-            // Kolona za dugme
             Button(
                 onClick = {
                     Log.d("EventRow", "Selected Event: $event")

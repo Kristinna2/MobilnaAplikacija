@@ -45,7 +45,6 @@ fun UserProfilePage(
     authViewModel: AuthViewModel,
     userId: String?
 ) {
-    // State variables for user data
     var firstName by remember { mutableStateOf<String?>(null) }
     var lastName by remember { mutableStateOf<String?>(null) }
     var phoneNumber by remember { mutableStateOf<String?>(null) }
@@ -55,10 +54,8 @@ fun UserProfilePage(
     val eventViewModel: EventViewModel = viewModel()
     var events by remember { mutableStateOf<List<Event>>(emptyList()) }
 
-    // Fetch user data and ratings
     LaunchedEffect(userId) {
         userId?.let { id ->
-            // Fetch user data
             val userDocument = FirebaseFirestore.getInstance().collection("users").document(id)
             userDocument.get().addOnSuccessListener { document ->
                 if (document != null) {
@@ -70,14 +67,12 @@ fun UserProfilePage(
                 }
             }
 
-            // Fetch events for the user
             eventViewModel.filterEventsByUserId(id) { userEvents ->
                 events = userEvents
             }
         }
     }
 
-    // Add vertical scroll
     val scrollState = rememberScrollState()
 
     Column(
@@ -98,7 +93,6 @@ fun UserProfilePage(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Display the profile picture if available
         Box(
             modifier = Modifier
                 .size(150.dp)
@@ -121,7 +115,6 @@ fun UserProfilePage(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Display user's name and other details
         Text(
             text = "Name: ${firstName ?: "Loading..."} ${lastName ?: ""}",
             fontSize = 24.sp,
@@ -146,7 +139,6 @@ fun UserProfilePage(
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // Display user's events
         Text(
             text = "User's Events:",
             fontSize = 24.sp,

@@ -57,13 +57,11 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun RateDialog(
-//    onApply: () -> Unit,
-//    onDismiss: () -> Unit
     showRateDialog: MutableState<Boolean>,
     rate: MutableState<Int>,
     rateEvent: () -> Unit,
     isLoading: MutableState<Boolean>,
-    onRateConfirmed: (Int) -> Unit // Dodao sam lambda funkciju koja se poziva nakon potvrde ocene
+    onRateConfirmed: (Int) -> Unit
 
 ) {
     val interactionSource = remember { MutableInteractionSource() }
@@ -136,14 +134,14 @@ fun RateDialog(
                             onClick = {
                                 isLoading.value = true
                                 rateEvent()
-                                onRateConfirmed(rate.value) // Poziv lambda funkcije sa izabranom ocenom
-                                val points = 10  // Na primer, 10 poena za ocenu
+                                onRateConfirmed(rate.value)
+                                val points = 10
                                 coroutineScope.launch {
                                     val result = databaseService.addPoints(uid!!, points)
-                                    // Obrada rezultata (prikazivanje poruke, itd.)
+
                                     isLoading.value = false
                                 }
-                                showRateDialog.value = false // Zatvaranje dijaloga
+                                showRateDialog.value = false
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -199,8 +197,3 @@ fun RateDialog(
     )
 }
 
-@Preview
-@Composable
-fun PreviewRateBeachDialog(){
-//    RateBeachDialog()
-}

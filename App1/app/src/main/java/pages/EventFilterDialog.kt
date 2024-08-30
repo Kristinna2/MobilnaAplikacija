@@ -32,10 +32,9 @@ import com.google.firebase.firestore.GeoPoint
 @Composable
 fun EventFilterDialog(
     onDismiss: () -> Unit,
-    centerPoint: GeoPoint, // Added center point parameter
-
+    centerPoint: GeoPoint,
     eventViewModel: EventViewModel = viewModel(),
-    usersViewModel: UsersViewModel = viewModel() // Dodajemo ViewModel kao parametar
+    usersViewModel: UsersViewModel = viewModel()
 ) {
     var isCategoryDropdownExpanded by remember { mutableStateOf(false) }
     var isUserDropdownExpanded by remember { mutableStateOf(false) }
@@ -49,14 +48,14 @@ fun EventFilterDialog(
     var radius by remember { mutableStateOf(1f) } // Initialize with a default value
 
 
-
-    // Prikupite podatke o događajima
     val eventsResource by eventViewModel.events.collectAsState()
     val eventsState = when (eventsResource) {
-        is Resource.Success -> (eventsResource as Resource.Success<List<Event>>).result // Uzimamo listu događaja
-        is Resource.Failure -> emptyList() // Ili neka druga logika za greške
-        is Resource.Loading -> emptyList() // U slučaju učitavanja
+        is Resource.Success -> (eventsResource as Resource.Success<List<Event>>).result
+        is Resource.Failure -> emptyList()
+        is Resource.Loading -> emptyList()
     }
+
+
    val markerViewModel: MarkerViewModel = viewModel()
 
 
@@ -71,7 +70,6 @@ fun EventFilterDialog(
         },
         text = {
             Column {
-                // Padajući meni za kategorije
                 TextButton(onClick = { isCategoryDropdownExpanded = !isCategoryDropdownExpanded }) {
                     Text(Category)
                 }
@@ -110,10 +108,8 @@ fun EventFilterDialog(
                     )
                 }
 
-                // Spacer između menija
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Padajući meni za naziv događaja
                 TextButton(onClick = { isEventNameDropdownExpanded = !isEventNameDropdownExpanded }) {
                     Text(ChooseEventName)
                 }
@@ -125,17 +121,15 @@ fun EventFilterDialog(
                     eventsState.filter { it.eventName.isNotEmpty() }.forEach { event: Event ->
                         DropdownMenuItem(
                             onClick = {
-                                ChooseEventName = event.eventName // Pretpostavljamo da event ima naziv
+                                ChooseEventName = event.eventName
                                 isEventNameDropdownExpanded = false
                             },
                             text = { Text(event.eventName) }
                         )
                     }
                 }
-                // Spacer između menija i dugmeta za odabir korisnika
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Padajući meni za korisnike
                 TextButton(onClick = { isUserDropdownExpanded = !isUserDropdownExpanded }) {
                     Text(ChooseUser?.let { "${it.firstName} ${it.lastName}" } ?: "Select User")
                 }
@@ -155,10 +149,7 @@ fun EventFilterDialog(
                     }
                 }
 
-                // Spacer između menija i dugmeta za odabir crowd levela
                 Spacer(modifier = Modifier.height(16.dp))
-
-                // Padajući meni za crowd level (1 do 5)
 
 
                 TextButton(onClick = { isCrowdLevelDropdownExpanded = !isCrowdLevelDropdownExpanded }) {
@@ -181,20 +172,17 @@ fun EventFilterDialog(
                 }
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Slider for radius
                 Text(text = "Radius: ${radius.toInt()} km")
                 Slider(
                     value = radius,
                     onValueChange = { newRadius -> radius = newRadius },
-                    valueRange = 1f..50f, // Example range for radius
-                    steps = 49 // Number of steps between min and max value
+                    valueRange = 1f..50f,
+                    steps = 49
                 )
             }
         },
         confirmButton = {
             TextButton(onClick = {
-               // val selectedUserName = ChooseUser?.let { "${it.firstName} ${it.lastName}" } ?: "No User Selected"
-              //  Log.d("EventFilterDialog", "Selected User: ${ChooseUser?.firstName!!}")
 
             if(ChooseUser!=null){
                 markerViewModel.filterMarkersByUserName(ChooseUser!!.firstName, ChooseUser!!.lastName) { filteredMarkers ->
@@ -204,7 +192,7 @@ fun EventFilterDialog(
                 markerViewModel.filterMarkers(Category, ChooseEventName, selectedCrowdLevel,radius, centerPoint)
 
             }
-                onDismiss() // Zatvori dijalog nakon filtriranja
+                onDismiss()
             }) {
                 Text("Filter")
             }

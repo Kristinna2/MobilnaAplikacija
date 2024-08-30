@@ -100,9 +100,7 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
         priority = com.google.android.gms.location.LocationRequest.PRIORITY_HIGH_ACCURACY
     }
 
-    // val savedStateHandle = navController.currentBackStackEntry?.savedStateHandle
 
-    // Handle new markers
     LaunchedEffect(Unit) {
         navController.currentBackStackEntry?.savedStateHandle?.getLiveData<Pair<LatLng, String>>("newMarker")
             ?.observeForever { newMarker ->
@@ -112,7 +110,6 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
             }
     }
 
-    // val markers by homeViewModel.markers.collectAsState(initial = emptyList())
     val markers by markerViewModel.markers.collectAsState()
 
     LaunchedEffect(Unit) {
@@ -122,8 +119,8 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
                     super.onLocationResult(locationResult)
                     locationResult.locations.forEach { location ->
                         Log.d("HomePage", "Updated Location: ${location.latitude}, ${location.longitude}")
-                        // currentLocation.value = LatLng(location.latitude, location.longitude)                    }
-                        currentLocation.value = LatLng(37.3400000, -122.1500000)}
+                         currentLocation.value = LatLng(location.latitude, location.longitude)                    }
+                       //currentLocation.value = LatLng(43.3009173, 21.7218937)}
 
                 }
             }, null)
@@ -151,16 +148,13 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
         }
     }
 
-    //  val markers = remember { mutableStateListOf<Pair<LatLng, String>>() }
     var selectedMarker by remember { mutableStateOf<LatLng?>(null) }
     val markerName = remember { mutableStateOf(TextFieldValue("")) }
 
     var expanded by remember { mutableStateOf(false) }
 
-    // Search bar state
     val searchQuery = remember { mutableStateOf(TextFieldValue("")) }
 
-    // Filter buttons state
     var selectedColor by remember { mutableStateOf<Color?>(null) }
     var showDialog by remember { mutableStateOf(false) }
 
@@ -175,6 +169,7 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
             centerPoint = currentLocation.value?.let { GeoPoint(it.latitude, it.longitude) } ?: GeoPoint(0.0, 0.0) // Default center point
         )
     }
+
     if (showDialog) {
         MarkerNameDialog(
             markerName = markerName,
@@ -186,7 +181,7 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
                 showDialog = false
             },
             onOpen = {
-                markerName.value = TextFieldValue("")// Resetovanje unosa pri otvaranju dijaloga
+                markerName.value = TextFieldValue("")
             }
         )
     }
@@ -198,7 +193,8 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
             cameraPositionState.position = CameraPosition.fromLatLngZoom(it, 15f)
         }
     }
-//DODATO
+
+
     val filteredMarkers by markerViewModel.filteredMarkers.observeAsState(emptyList())
     val isFilterApplied by markerViewModel.isFilterApplied.observeAsState(false) // Da li je filter primenjen
 
@@ -207,13 +203,11 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
     val eventsState by eventViewModel.events.collectAsState()
     var selectedEvent by remember { mutableStateOf<Event?>(null) }
 
-    // Preuzmite ID događaja iz savedStateHandle
     val eventId = navController.currentBackStackEntry?.savedStateHandle?.get<String>("eventId")
 
     Log.d("HomePage", "eventId: $eventId")
     LaunchedEffect(eventId) {
         if (eventId != null) {
-            // Učitajte podatke vezane za eventId
             Log.d("HomePage", "Loading data for Event ID: $eventId")
         }
     }
@@ -224,11 +218,9 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
                 selectedEvent = (eventsState as Resource.Success).result.find { event -> event.id == eventId }
             }
             is Resource.Loading -> {
-                // Prikazivanje loading indikatora
                 CircularProgressIndicator()
             }
             is Resource.Failure -> {
-                // Prikazivanje poruke o grešci
                 val errorMessage = (eventsState as Resource.Failure).exception.message
                 Text(text = "Greška: $errorMessage", color = Color.Red)
             }
@@ -239,11 +231,10 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(Color(0xFFC9E2F3)) // Pozadina aplikacije na svetlu plavu boju
+            .background(Color(0xFFC9E2F3))
 
             .padding(16.dp)
     ) {
-        // Raspored za naslov i ikonu
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -255,10 +246,10 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
             Text(
                 text = "Trace the Events",
                 fontSize = 32.sp,
-                fontWeight = FontWeight.Bold, // Podebljani font za naglašavanje
-                color = Color(0xFFF75553), // Tamno plava boja za tekst
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFFF75553),
                 modifier = Modifier
-                    .padding(vertical = 16.dp) // Povećana vertikalna margina za bolji razmak
+                    .padding(vertical = 16.dp)
             )
 
             Box(
@@ -277,7 +268,7 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
                     expanded = expanded,
                     onDismissRequest = { expanded = false },
                     modifier = Modifier
-                        .background(Color(0xFFF75553)) // Boja pozadine menija
+                        .background(Color(0xFFF75553))
                 ) {
                     DropdownMenuItem(
                         text = { Text("User Profile", color = Color.White) },
@@ -301,7 +292,7 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
                         text = { Text("All Events", color = Color.White) },
                         onClick = {
                             expanded = false
-                            navController.navigate("allevents") // Nova ruta za navigaciju
+                            navController.navigate("allevents")
                         }
                     )
                     DropdownMenuItem(
@@ -317,13 +308,13 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
 
         Button(
             onClick = {
-                markerViewModel.resetFilter() // Resetuje filter
+                markerViewModel.resetFilter()
             },
             modifier = Modifier
-                .fillMaxWidth() // Puni širinu
-                .padding(vertical = 8.dp), // Razmak oko dugmeta
+                .fillMaxWidth()
+                .padding(vertical = 8.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFFF75553) // Boja pozadine dugmeta
+                containerColor = Color(0xFFF75553)
             )
         ) {
             Text(
@@ -332,7 +323,6 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
                 color = Color.White
             )
         }
-        // Search bar
 
         Box(
             modifier = Modifier
@@ -350,9 +340,9 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp)
                     .align(Alignment.TopCenter)
-                    .background(Color.White, RoundedCornerShape(8.dp)) // Dodaj pozadinsku boju i zaobljenje
-                    .border(1.dp, Color.Gray, RoundedCornerShape(8.dp)) // Dodaj border za bolju vidljivost
-                    .zIndex(1f), // Postavi TextField iznad mape
+                    .background(Color.White, RoundedCornerShape(8.dp))
+                    .border(1.dp, Color.Gray, RoundedCornerShape(8.dp))
+                    .zIndex(1f),
                 maxLines = 1,
                 singleLine = true,
                 colors = TextFieldDefaults.colors(
@@ -368,9 +358,9 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
                 )
             )
             val markersToDisplay = if (isFilterApplied) {
-                filteredMarkers // Prikazujemo filtrirane markere
+                filteredMarkers
             } else {
-                markers // Prikazujemo sve markere
+                markers
             }
 
             GoogleMap(
@@ -387,8 +377,8 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
                 currentLocation.value?.let {
                     Circle(
                         center = it,
-                        radius = 50.0, // Promenite veličinu po potrebi
-                        fillColor = Color.Blue.copy(alpha = 0.5f), // Boja kružića
+                        radius = 50.0,
+                        fillColor = Color.Blue.copy(alpha = 0.5f),
                         strokeColor = Color.Blue,
                         strokeWidth = 2f
                     )
@@ -445,7 +435,7 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
 
                         isMarkerButtonPressed=false
                         isFilterButtonPressed = true
-                        showFilterDialog = true // Show filter dialog
+                        showFilterDialog = true
 
 
 
@@ -453,11 +443,11 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
 
                     modifier = Modifier
                         .weight(1f)
-                        .padding(end = 8.dp) // Razmak između dugmadi
-                        .size(60.dp), // Okruglo dugme
-                    shape = RoundedCornerShape(30.dp), // Okrugli oblik
+                        .padding(end = 8.dp)
+                        .size(60.dp),
+                    shape = RoundedCornerShape(30.dp),
                     colors = androidx.compose.material3.ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFF75553) // Boja pozadine dugmeta
+                        containerColor = Color(0xFFF75553)
                     )
                 ) {
                     Text(
@@ -477,15 +467,15 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
                     },
                     modifier = Modifier
                         .weight(1f)
-                        .padding(start = 8.dp, end = 8.dp) // Razmak između dugmadi
-                        .size(60.dp), // Okruglo dugme
-                    shape = RoundedCornerShape(30.dp), // Okrugli oblik
+                        .padding(start = 8.dp, end = 8.dp)
+                        .size(60.dp),
+                    shape = RoundedCornerShape(30.dp),
                     colors = androidx.compose.material3.ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFF75553) // Boja pozadine dugmeta
+                        containerColor = Color(0xFFF75553)
                     )
                 ) {
                     Text(
-                        text = "Dodaj",
+                        text = "Add",
                         fontSize = 16.sp,
                         color = Color.White
                     )
@@ -493,21 +483,20 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
 
                 Button(
                     onClick = {
-                        // Navigacija do stranice za lokaciju
                         navController.navigate("location_service")
                     },
                     modifier = Modifier
                         .weight(1f)
-                        .padding(start = 8.dp) // Razmak između dugmadi
-                        .size(60.dp), // Okruglo dugme
-                    shape = RoundedCornerShape(30.dp), // Okrugli oblik
+                        .padding(start = 8.dp)
+                        .size(60.dp),
+                    shape = RoundedCornerShape(30.dp),
                     colors = androidx.compose.material3.ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFF75553) // Boja pozadine dugmeta
+                        containerColor = Color(0xFFF75553)
                     )
                 ) {
                     Text(
                         text = "Location",
-                        fontSize = 16.sp,
+                        fontSize = 10.sp,
                         color = Color.White
                     )
                 }
@@ -521,7 +510,7 @@ fun MarkerNameDialog(
     markerName: MutableState<TextFieldValue>,
     onDismiss: () -> Unit,
     onConfirm: () -> Unit,
-    onOpen: () -> Unit // Funkcija za resetovanje unosa
+    onOpen: () -> Unit
 ) {
     LaunchedEffect(Unit) {
         onOpen()
