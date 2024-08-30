@@ -249,7 +249,7 @@ fun DetailsPage(
                             event = event
                         )
                     }
-                   updateRatesAndAverage(rates, myPrice.value, rateExist == null, averageRate)
+                 //  updateRatesAndAverage(rates, myPrice.value, rateExist == null, averageRate)
                     addPointsToUser(userId!!, 10)
 
                 },
@@ -310,7 +310,7 @@ fun DetailsPage(
                 averageRate.value = sum / rates.size
                 Log.d("Rates", "Rates: $rates")
                 Log.d("AverageCalculation", "Sum: $sum, Size: ${rates.size}, Average: ${averageRate.value}")
-                updateRatesAndAverage(rates, myPrice.value, false, averageRate)
+            //    updateRatesAndAverage(rates, myPrice.value, false, averageRate)
 
             }
 
