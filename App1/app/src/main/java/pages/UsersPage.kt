@@ -144,9 +144,8 @@ fun UserItem(user: User, onFetchEvents: (String) -> Unit, isTopUser: Boolean,
             Text(
                 text = "Points: ${user.points}",
                 fontSize = 14.sp,
-                color = if (isTopUser) Color.Green else Color.White
+                color = if (isTopUser) Color.Green else Color.Red
             )
-            // Button to fetch events for the user
             Button(onClick = { onFetchEvents(user.id) }) {
                 Text(text = "Show Events")
             }
