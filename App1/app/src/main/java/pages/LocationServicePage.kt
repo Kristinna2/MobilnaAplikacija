@@ -117,34 +117,32 @@ fun LocationServicePage(modifier: Modifier = Modifier, navController: NavControl
                 )
                 Switch(
                     checked = checked.value,
-                    onCheckedChange = { isChecked ->
-                        checked.value = isChecked
-
-                        val serviceIntent = Intent(context, LocationService::class.java).apply {
-                            action = if (isChecked) {
-                                LocationService.ACTION_FIND_NEARBY
-                            } else {
-                                LocationService.ACTION_STOP
+                    onCheckedChange = {
+                        checked.value = it
+                        if (it) {
+                            Intent(context, LocationService::class.java).apply {
+                                action = LocationService.ACTION_FIND_NEARBY
+                                context.startForegroundService(this)
                             }
-                        }
-
-                        if (isChecked) {
-                            Log.d("Switch", "Starting Location Service")
-                            context.startForegroundService(serviceIntent)
                             with(sharedPreferences.edit()) {
                                 putBoolean("tracking_location", true)
                                 apply()
                             }
                         } else {
-                            Log.d("Switch", "Stopping Location Service")
-                            context.stopService(serviceIntent)
+                            Intent(context, LocationService::class.java).apply {
+                                action = LocationService.ACTION_STOP
+                                context.stopService(this)
+                            }
+                            Intent(context, LocationService::class.java).apply {
+                                action = LocationService.ACTION_START
+                                context.startForegroundService(this)
+                            }
                             with(sharedPreferences.edit()) {
                                 putBoolean("tracking_location", false)
                                 apply()
                             }
                         }
                     },
-
                     thumbContent = if (checked.value) {
                         {
                             Icon(
