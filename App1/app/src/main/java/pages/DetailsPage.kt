@@ -60,12 +60,12 @@ import java.math.RoundingMode
 @Composable
 fun DetailsPage(
     navController: NavController,
-  //  eventViewModel: EventViewModel = viewModel(factory = EventViewModelFactory()),
 ) {
 
     val  eventViewModel: EventViewModel = viewModel(factory = EventViewModelFactory())
     val viewModel: AuthViewModel = viewModel()
     val  usersViewModel: UsersViewModel = viewModel()
+
     var userName by remember { mutableStateOf("") }
     val userId = viewModel.getCurrentUser()?.uid
 
@@ -110,7 +110,7 @@ fun DetailsPage(
     val averageRate = remember { mutableStateOf(0.0) }
     val isLoading = remember { mutableStateOf(false) }
     val showRateDialog = remember { mutableStateOf(false) }
-    val myPrice = remember { mutableStateOf(0) }
+    val myPoints = remember { mutableStateOf(0) }
 
     LaunchedEffect(event.id) {
         if (event.id.isNotEmpty()) {
@@ -175,29 +175,7 @@ fun DetailsPage(
                         )
                     }
 
-                    if (marker.galleryImages.isNotEmpty()) {
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text(
-                            text = "Gallery Images:",
-                            color = Color.Black,
-                            fontSize = 18.sp,
-                            modifier = Modifier.padding(bottom = 8.dp)
-                        )
-                        marker.galleryImages.forEach { imageUrl ->
-                            Spacer(modifier = Modifier.height(8.dp))
-                            AsyncImage(
-                                model = ImageRequest.Builder(LocalContext.current)
-                                    .data(imageUrl)
-                                    .crossfade(true)
-                                    .build(),
-                                contentDescription = "Gallery Image",
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(200.dp)
-                                    .background(Color.Gray)
-                            )
-                        }
-                    }
+
 
                     Spacer(modifier = Modifier.height(16.dp))
                     InfoBox(label = "Latitude", value = marker.location.latitude.toString())
@@ -212,7 +190,7 @@ fun DetailsPage(
             )
         }
         Spacer(modifier = Modifier.height(16.dp))
-        CustomLandmarkRate(average = averageRate.value)
+        CustomEventRate(average = averageRate.value)
 
         CustomRateButton(
             enabled = event.userId != viewModel.getCurrentUser()?.uid,
@@ -221,7 +199,7 @@ fun DetailsPage(
                     it.eventId == event.id && it.userId == viewModel.getCurrentUser()!!.uid
                 }
                 if (rateExist != null) {
-                    myPrice.value = rateExist.rate
+                    myPoints.value = rateExist.rate
                 }
                 showRateDialog.value = true
             }
@@ -230,7 +208,7 @@ fun DetailsPage(
         if (showRateDialog.value) {
             RateDialog(
                 showRateDialog = showRateDialog,
-                rate = myPrice,
+                rate = myPoints,
                 rateEvent = {
                     val rateExist = rates.firstOrNull {
                         it.eventId == event.id && it.userId == viewModel.getCurrentUser()!!.uid
@@ -239,13 +217,13 @@ fun DetailsPage(
                         isLoading.value = true
                         eventViewModel.updateRate(
                             rid = rateExist.id,
-                            rate = myPrice.value
+                            rate = myPoints.value
                         )
                     } else {
                         isLoading.value = true
                         eventViewModel.addRate(
                             bid = event.id,
-                            rate = myPrice.value,
+                            rate = myPoints.value,
                             event = event
                         )
                     }
@@ -255,7 +233,7 @@ fun DetailsPage(
                 },
                 isLoading = isLoading,
                 onRateConfirmed = { selectedRate ->
-                    myPrice.value = selectedRate
+                    myPoints.value = selectedRate
                     Log.d("DetailsPage", "Selected Rating: $selectedRate")
 
                 }
@@ -266,7 +244,7 @@ fun DetailsPage(
         when (resource) {
             is Resource.Success -> {
                 Log.d("DataFetch", "Rates fetched successfully: ${resource.result}")
-                rates.clear()  // Clear existing rates
+                rates.clear()
                 rates.addAll(resource.result)
                 val sum = rates.sumOf { it.rate.toDouble() }
                 if (sum != 0.0) {
@@ -278,7 +256,6 @@ fun DetailsPage(
             }
 
             is Resource.Loading -> {
-                // Handle loading state if needed
             }
 
             is Resource.Failure -> {
@@ -294,18 +271,17 @@ fun DetailsPage(
                 isLoading.value = false
                 val existingRate = rates.firstOrNull { it.id == resource.result }
                 if (existingRate != null) {
-                    existingRate.rate = myPrice.value
+                    existingRate.rate = myPoints.value
                 } else {
                     rates.add(
                         Rate(
                             id = resource.result,
-                            rate = myPrice.value,
+                            rate = myPoints.value,
                             eventId = event.id,
                             userId = viewModel.getCurrentUser()!!.uid
                         )
                     )
                 }
-                // Recalculate the average rate
                 val sum = rates.sumOf { it.rate.toDouble() }
                 averageRate.value = sum / rates.size
                 Log.d("Rates", "Rates: $rates")
@@ -315,7 +291,6 @@ fun DetailsPage(
             }
 
             is Resource.Loading -> {
-                // Handle loading state
             }
 
             is Resource.Failure -> {
@@ -389,7 +364,7 @@ fun CustomRateButton(
         ),
     ) {
         Text(
-            "Rate landmark",
+            "Rate event",
             style = TextStyle(
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold
@@ -399,7 +374,7 @@ fun CustomRateButton(
 }
 
 @Composable
-fun CustomLandmarkRate(
+fun CustomEventRate(
     average: Number
 ) {
     Row(

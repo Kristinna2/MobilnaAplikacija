@@ -65,9 +65,7 @@ class RateRepositoryImpl : RateRepository {
         }
     }
 
-    override suspend fun getUserAdForEvent(): Resource<List<Rate>> {
-        TODO("Not yet implemented")
-    }
+
 
     override suspend fun addRate(
         lid: String,

@@ -64,6 +64,7 @@ fun RateDialog(
     onRateConfirmed: (Int) -> Unit
 
 ) {
+
     val interactionSource = remember { MutableInteractionSource() }
 
     val firestore = FirebaseFirestore.getInstance()
@@ -92,9 +93,8 @@ fun RateDialog(
                     Column(
                         modifier = Modifier.fillMaxWidth()
                     ) {
-//                        Image(painter = painterResource(id = R.drawable.cutestar), contentDescription = "")
                         Text(
-                            text = "Rate this landmark?",
+                            text = "Rate this event?",
                             style = TextStyle(
                                 fontSize = 24.sp,
                                 textAlign = TextAlign.Center,

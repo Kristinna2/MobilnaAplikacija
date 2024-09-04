@@ -61,11 +61,10 @@ fun EventDetailsPage(navController: NavController) {
     var imageUri by remember { mutableStateOf<Uri?>(null) }
     val buttonIsLoading = remember { mutableStateOf(false) }
     val showedAlert = remember { mutableStateOf(false) }
+
     val eventFlow = eventViewModel.eventFlow.collectAsState(initial = null).value
-    var galleryImages by remember { mutableStateOf<List<Uri>>(emptyList()) }
 
 
-    // Photo picker launcher
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
@@ -75,7 +74,6 @@ fun EventDetailsPage(navController: NavController) {
     val location = remember { mutableStateOf<LatLng?>(null) }
     val savedStateHandle = navController.previousBackStackEntry?.savedStateHandle
 
-    // Preuzimanje vrednosti iz SavedStateHandle-a
     LaunchedEffect(Unit) {
         val receivedLocation = savedStateHandle?.get<LatLng>("location")
         location.value = receivedLocation
@@ -204,7 +202,7 @@ fun EventDetailsPage(navController: NavController) {
                     "newMarker",
                     Pair(location.value!!, eventName.value.text)
                 )
-                navController.navigateUp() // Navigate back
+                navController.navigateUp()
             },
             modifier = Modifier.align(Alignment.End)
         ) {

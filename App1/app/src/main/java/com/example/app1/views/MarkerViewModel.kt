@@ -33,22 +33,13 @@ data class Marker(
 
 class MarkerViewModel(private val context: Context) : ViewModel() {
 
-    private val eventViewModel: EventViewModel by lazy {
-        ViewModelProvider(
-            (context as ViewModelStoreOwner)
-        ).get(EventViewModel::class.java)
-    }
-
     private val _markers = MutableStateFlow<List<Marker>>(emptyList())
     val markers: StateFlow<List<Marker>> = _markers
 
-    //dodajem ove dve
-    private val _filteredMarkerss = MutableLiveData<List<Event>>() // Lista filtriranih markera
-
-    private val _filteredMarkers = MutableLiveData<List<Marker>>() // Lista filtriranih markera
+    private val _filteredMarkers = MutableLiveData<List<Marker>>()
     val filteredMarkers: LiveData<List<Marker>> get() = _filteredMarkers
-//dodato
-    private val _isFilterApplied = MutableLiveData<Boolean>(false) // Stanje da li je filter primenjen
+
+    private val _isFilterApplied = MutableLiveData<Boolean>(false)
     val isFilterApplied: LiveData<Boolean> get() = _isFilterApplied
 
     private val firestore = FirebaseFirestore.getInstance()
@@ -59,9 +50,9 @@ class MarkerViewModel(private val context: Context) : ViewModel() {
     }
 
     fun addMarker(latitude: Double, longitude: Double, name: String) {
-        val newLandmark = Marker()
+        val newEvent = Marker()
         firestore.collection("events")
-            .add(newLandmark)
+            .add(newEvent)
             .addOnSuccessListener {
                 Log.d("HomeViewModel", "Event added successfully")
             }
@@ -75,7 +66,7 @@ class MarkerViewModel(private val context: Context) : ViewModel() {
     private var listenerRegistration: ListenerRegistration? = null
 
 
-    //druga zimena
+
     private fun loadMarkers() {
         listenerRegistration = firestore.collection("events")
             .addSnapshotListener { snapshots, e ->
@@ -86,23 +77,20 @@ class MarkerViewModel(private val context: Context) : ViewModel() {
 
                 if (snapshots != null) {
                     val markerList = snapshots.mapNotNull { doc ->
-                        // Pretvori dokument u Marker klasu
                         val marker = doc.toObject(Marker::class.java).copy(id = doc.id)
 
-                        // Proveri da li marker ima važne vrednosti, kao što su eventName i location
                         if (marker.eventName.isNotEmpty() && marker.location != GeoPoint(0.0, 0.0)) {
                             marker
                         } else {
-                            null // Ako su vrednosti prazne, vrati null
+                            null
                         }
                     }
                     _markers.value = markerList
                 }
             }
     }
-//i ovo
+
 fun getUserIdByNameFromFirestore(firstName: String, lastName: String, onResult: (String?) -> Unit) {
- //   val firestore = FirebaseFirestore.getInstance()
 
     firestore.collection("users")
         .whereEqualTo("firstName", firstName)
@@ -110,34 +98,27 @@ fun getUserIdByNameFromFirestore(firstName: String, lastName: String, onResult: 
         .get()
         .addOnSuccessListener { documents ->
             if (documents != null && !documents.isEmpty) {
-                // Pretpostavljamo da je ime i prezime jedinstveno, pa uzimamo prvi dokument
                 val userId = documents.documents[0].id
                 onResult(userId)
             } else {
-                // Korisnik nije pronađen
                 onResult(null)
             }
         }
         .addOnFailureListener { exception ->
-            // U slučaju greške, vratiti null
             onResult(null)
         }
 }
 
     fun filterMarkers(category: String,eventName: String, crowdLevel: Int, radius: Float, centerPoint: GeoPoint) {
-        val radiusInMeters = radius * 1000 // Convert km to meters
-
+        val radiusInMeters = radius * 1000
 
         val filtered = _markers.value?.filter { marker ->
 
             val markerLocation = marker.location
             val distance = calculateDistance(centerPoint.latitude, centerPoint.longitude, markerLocation.latitude, markerLocation.longitude)
 
-            // Proveravamo da li marker odgovara kategoriji
             val matchesCategory = (category != "Select Category" && marker.eventType == category)
-            // Proveravamo da li marker odgovara imenu događaja
             val matchesEventName = (eventName != "Select Event Name" && marker.eventName == eventName)
-            // Proveravamo da li marker odgovara nivou gužve
             val matchesCrowdLevel = (crowdLevel != 0 && marker.crowdLevel == crowdLevel)
             Log.d("MarkerViewModel","crowd:${marker.crowdLevel}")
 
@@ -145,35 +126,29 @@ fun getUserIdByNameFromFirestore(firstName: String, lastName: String, onResult: 
 
 
 
-            // Na osnovu uslova se koristi logički "I"
-            matchesCategory || matchesEventName || matchesCrowdLevel|| withinRadius  // Svi uslovi se povezuju sa logičkim "ILI"
+            matchesCategory || matchesEventName || matchesCrowdLevel|| withinRadius
         } ?: emptyList()
 
-        // Postavljamo filtrirane markere
         _filteredMarkers.value = filtered
-        _isFilterApplied.value = true // Obeležavamo da je filter primenjen
+        _isFilterApplied.value = true
 
         Log.d("MarkerViewModel", "Filtered markers: ${filtered.joinToString { it.eventName }}")
     }
 
     fun filterMarkersByUserName(firstName: String, lastName: String, onResult: (List<Marker>) -> Unit) {
         getUserIdByNameFromFirestore(firstName, lastName) { userId ->
-            // Logujemo dobijeni userId
             Log.d("FilterMarkers", "Dobijeni userId: $userId")
 
             if (userId != null) {
-                // Ako je pronađen ID, filtriramo markere
                 val filteredMarkers = _markers.value?.filter { marker ->
                     marker.userId == userId
                 } ?: emptyList()
 
-                // Vraćamo filtrirane markere
                 onResult(filteredMarkers)
-                _filteredMarkers.value = filteredMarkers // Resetovanje filtriranih markera
+                _filteredMarkers.value = filteredMarkers
 
-                _isFilterApplied.value = true // Resetovanje filtera
+                _isFilterApplied.value = true
             } else {
-                // Ako korisnik nije pronađen, vraćamo praznu listu
                 onResult(emptyList())
             }
         }
@@ -181,8 +156,8 @@ fun getUserIdByNameFromFirestore(firstName: String, lastName: String, onResult: 
 
 
     fun resetFilter() {
-        _isFilterApplied.value = false // Resetovanje filtera
-        _filteredMarkers.value = emptyList() // Resetovanje filtriranih markera
+        _isFilterApplied.value = false
+        _filteredMarkers.value = emptyList()
     }
 
 
@@ -193,7 +168,7 @@ fun getUserIdByNameFromFirestore(firstName: String, lastName: String, onResult: 
     }
 
     private fun calculateDistance(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
-        val earthRadius = 6371000.0 // Correct Earth radius in meters
+        val earthRadius = 6371000.0
 
         val dLat = Math.toRadians(lat2 - lat1)
         val dLon = Math.toRadians(lon2 - lon1)
@@ -206,20 +181,6 @@ fun getUserIdByNameFromFirestore(firstName: String, lastName: String, onResult: 
 
         return earthRadius * c
     }
-    private fun convertFilteredEventsToMarkers(events: List<Event>): List<Marker> {
-        return events.map { event ->
-            Marker(
-                id = event.id,
-                userId = event.userId,
-                eventName = event.eventName,
-                eventType = event.eventType,
-                description = event.description!!,
-                crowdLevel = event.crowdLevel!!,
-                mainImage = event.mainImage!!,
-                galleryImages = event.galleryImages,
-                location = event.location
-            )
-        }
-    }
+
 
 }

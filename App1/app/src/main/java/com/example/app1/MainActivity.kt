@@ -1,11 +1,13 @@
 package com.example.app1
 
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -20,25 +22,21 @@ class MainActivity : ComponentActivity() {
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
             if (isGranted) {
-                // Dozvola je odobrena
                 println("Location permission granted")
             } else {
-                // Dozvola je odbijena
                 println("Location permission denied")
             }
         }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        // Inicijalizacija AuthViewModel-a
         val authViewModel: AuthViewModel by viewModels()
 
-        // Inicijalizacija AppPermissions
         permission = AppPermissions()
 
-        // Provera i traženje dozvola za lokaciju
         if (permission.isLocationOk(this)) {
             println("Location permission allowed")
         } else {
@@ -46,7 +44,6 @@ class MainActivity : ComponentActivity() {
             println("Location permission denied")
         }
 
-        // Postavljanje sadržaja sa Compose temom
         setContent {
             App1Theme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->

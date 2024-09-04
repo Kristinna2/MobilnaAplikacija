@@ -88,22 +88,22 @@ fun RegisterPage(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(Color(0xFFbce6f6)) // Light pastel cyan background
+            .background(Color(0xFFbce6f6))
             .padding(16.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(text = "Register!", fontSize = 36.sp, fontWeight = FontWeight.Bold, color = Color(0xFF2589a0)) // Vibrant Blue title
 
-        Spacer(modifier = Modifier.height(24.dp)) // Veći razmak između naslova i slike
+        Spacer(modifier = Modifier.height(24.dp))
 
-        // Box za odabir slike
+
         Box(
             modifier = Modifier
-                .size(100.dp) // Square size
-                .clip(RoundedCornerShape(12.dp)) // Rounded corners
-                .background(Color(0xFFF5F5F5)) // Very light gray background
-                .border(2.dp, Color(0xFFF75553)) // Vibrant Blue border
+                .size(100.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(Color(0xFFF5F5F5))
+                .border(2.dp, Color(0xFFF75553))
         ) {
             photoUri?.let {
                 AsyncImage(
@@ -124,7 +124,7 @@ fun RegisterPage(
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp)) // Veći razmak između slike i dugmeta
+        Spacer(modifier = Modifier.height(24.dp))
 
         Button(
             onClick = {
@@ -136,7 +136,7 @@ fun RegisterPage(
             Text(text = "Select Photo", fontSize = 18.sp, color = Color.White)
         }
 
-        Spacer(modifier = Modifier.height(24.dp)) // Veći razmak između dugmeta i polja za unos
+        Spacer(modifier = Modifier.height(24.dp))
 
         OutlinedTextField(
             value = firstName,
@@ -150,7 +150,7 @@ fun RegisterPage(
             textStyle = androidx.compose.ui.text.TextStyle(fontSize = 16.sp)
         )
 
-        Spacer(modifier = Modifier.height(16.dp)) // Veći razmak između polja
+        Spacer(modifier = Modifier.height(16.dp))
 
         OutlinedTextField(
             value = lastName,
@@ -160,11 +160,11 @@ fun RegisterPage(
             shape = RoundedCornerShape(12.dp),
             modifier = Modifier
                 .width(265.dp)
-                .height(60.dp), // Smanjena visina polja
+                .height(60.dp),
             textStyle = androidx.compose.ui.text.TextStyle(fontSize = 16.sp)
         )
 
-        Spacer(modifier = Modifier.height(18.dp)) // Veći razmak između polja
+        Spacer(modifier = Modifier.height(18.dp))
 
         OutlinedTextField(
             value = email,
@@ -174,11 +174,11 @@ fun RegisterPage(
             shape = RoundedCornerShape(12.dp),
             modifier = Modifier
                 .width(265.dp)
-                .height(60.dp), // Smanjena visina polja
+                .height(60.dp),
             textStyle = androidx.compose.ui.text.TextStyle(fontSize = 16.sp)
         )
 
-        Spacer(modifier = Modifier.height(18.dp)) // Veći razmak između polja
+        Spacer(modifier = Modifier.height(18.dp))
 
         OutlinedTextField(
             value = password,
@@ -189,11 +189,11 @@ fun RegisterPage(
             shape = RoundedCornerShape(12.dp),
             modifier = Modifier
                 .width(265.dp)
-                .height(60.dp), // Smanjena visina polja
+                .height(60.dp),
             textStyle = androidx.compose.ui.text.TextStyle(fontSize = 16.sp)
         )
 
-        Spacer(modifier = Modifier.height(16.dp)) // Veći razmak između polja
+        Spacer(modifier = Modifier.height(16.dp))
 
         OutlinedTextField(
             value = phoneNumber,
@@ -208,12 +208,12 @@ fun RegisterPage(
             shape = RoundedCornerShape(12.dp),
             modifier = Modifier
                 .width(265.dp)
-                .height(60.dp), // Smanjena visina polja
+                .height(60.dp),
             textStyle = androidx.compose.ui.text.TextStyle(fontSize = 16.sp),
             isError = !isValidPhoneNumber(phoneNumber)
         )
 
-        Spacer(modifier = Modifier.height(32.dp)) // Veći razmak pre dugmeta
+        Spacer(modifier = Modifier.height(32.dp))
 
         Button(
             onClick = {
@@ -225,13 +225,13 @@ fun RegisterPage(
             shape = RoundedCornerShape(12.dp),
             modifier = Modifier
                 .width(180.dp)
-                .height(48.dp), // Smanjena visina dugmeta
+                .height(48.dp),
             colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = Color(0xFFF75553)) // Light Blue button
         ) {
             Text(text = "Create Account", fontSize = 18.sp, color = Color.White)
         }
 
-     //   Spacer(modifier = Modifier.height(14.dp)) // Veći razmak pre tekst dugmeta
+     //   Spacer(modifier = Modifier.height(14.dp))
 
         TextButton(onClick = {
             navController.navigate("login")

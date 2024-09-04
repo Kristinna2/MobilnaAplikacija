@@ -50,13 +50,11 @@ class LocationService : Service() {
             ACTION_START -> {
                 Log.d("LocationService", "Service started")
 
-                // Create notification
+                createNotificationChannel()
                 val notification = createNotification()
 
-                // Start foreground service with the notification
                 startForeground(NOTIFICATION_ID, notification)
 
-                // Start location updates after starting foreground
                 startLocationUpdates()
             }
             ACTION_STOP -> {
@@ -73,7 +71,7 @@ class LocationService : Service() {
     }
 
     private fun startLocationUpdates(nearby: Boolean = false) {
-        locationClient.getLocationUpdates(10000L)
+        locationClient.getLocationUpdates(10000L)//10sek
             .catch { e -> e.printStackTrace() }
             .onEach { location ->
                 Log.d("LocationService", "Location: ${location.latitude}, ${location.longitude}")
@@ -86,7 +84,7 @@ class LocationService : Service() {
 
     private fun sendLocationUpdate(lat: Double, long: Double) {
         val intent = Intent(ACTION_LOCATION_UPDATE).apply {
-            putExtra(EXTRA_LOCATION_LATITUDE, lat)
+            putExtra(EXTRA_LOCATION_LATITUDE, lat)//dodatni podatak
             putExtra(EXTRA_LOCATION_LONGITUDE, long)
         }
         LocalBroadcastManager.getInstance(applicationContext).sendBroadcast(intent)
@@ -115,7 +113,7 @@ class LocationService : Service() {
     }
 
     private fun calculateDistance(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
-        val earthRadius = 6371.0 // Correct Earth radius in kilometers
+        val earthRadius = 6371000
 
         val dLat = Math.toRadians(lat2 - lat1)
         val dLon = Math.toRadians(lon2 - lon1)

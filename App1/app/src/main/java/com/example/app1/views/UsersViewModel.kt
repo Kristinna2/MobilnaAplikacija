@@ -24,7 +24,7 @@ class UsersViewModel : ViewModel() {
     private val _users = MutableStateFlow<List<User>>(emptyList())
     val users: StateFlow<List<User>> = _users
 
-    private val _userEvents = MutableStateFlow<Map<String, List<Event>>>(emptyMap()) // Mapa za događaje po korisniku
+    private val _userEvents = MutableStateFlow<Map<String, List<Event>>>(emptyMap())
     val userEvents: StateFlow<Map<String, List<Event>>> = _userEvents
 
 

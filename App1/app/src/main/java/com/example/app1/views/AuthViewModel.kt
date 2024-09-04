@@ -18,11 +18,10 @@ class AuthViewModel : ViewModel() {
     private val _authState = MutableLiveData<AuthState>()
     val authState: LiveData<AuthState> = _authState
     fun getCurrentUser() = auth.currentUser
+
     init {
         checkAuthStatus()
     }
-
-
 
     fun checkAuthStatus() {
         if (auth.currentUser == null) {

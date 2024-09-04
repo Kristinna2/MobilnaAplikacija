@@ -3,6 +3,7 @@ package pages
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -30,21 +31,21 @@ import com.example.app1.location.LocationService
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun LocationServicePage(modifier: Modifier = Modifier, navController: NavController) {
+
     val context = LocalContext.current
     val sharedPreferences = context.getSharedPreferences("settings", Context.MODE_PRIVATE)
-    val locationState = remember { mutableStateOf("Location not available") }
+    val locationState = remember { mutableStateOf("Location?") }
     val isTrackingServiceEnabled = sharedPreferences.getBoolean("tracking_location", true)
     val checked = remember { mutableStateOf(isTrackingServiceEnabled) }
 
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(Color(0xFFBCE6F6)) // Svetlo plava pozadina
+            .background(Color(0xFFBCE6F6))
             .padding(16.dp)
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Back button positioned in the top-left corner
         IconButton(
             onClick = { navController.popBackStack() },
             modifier = Modifier
@@ -54,9 +55,8 @@ fun LocationServicePage(modifier: Modifier = Modifier, navController: NavControl
             Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = "Back", tint = Color.Red)
         }
 
-        Spacer(modifier = Modifier.height(16.dp)) // Space to push content down
+        Spacer(modifier = Modifier.height(16.dp))
 
-        // Header
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -76,9 +76,9 @@ fun LocationServicePage(modifier: Modifier = Modifier, navController: NavControl
             )
         }
 
-        Spacer(modifier = Modifier.height(24.dp)) // Space between header and content
+        Spacer(modifier = Modifier.height(24.dp))
 
-        // Title
+
         Text(
             text = "Do you want to get updated every moment?",
             fontSize = 20.sp,
@@ -87,7 +87,6 @@ fun LocationServicePage(modifier: Modifier = Modifier, navController: NavControl
             modifier = Modifier.padding(vertical = 16.dp)
         )
 
-        // Display updated location
         Text(
             text = locationState.value,
             fontSize = 18.sp,
@@ -95,7 +94,6 @@ fun LocationServicePage(modifier: Modifier = Modifier, navController: NavControl
             modifier = Modifier.padding(vertical = 16.dp)
         )
 
-        // Service toggle switch
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -119,32 +117,34 @@ fun LocationServicePage(modifier: Modifier = Modifier, navController: NavControl
                 )
                 Switch(
                     checked = checked.value,
-                    onCheckedChange = {
-                        checked.value = it
-                        if (it) {
-                            Intent(context, LocationService::class.java).apply {
-                                action = LocationService.ACTION_FIND_NEARBY
-                                context.startForegroundService(this)
+                    onCheckedChange = { isChecked ->
+                        checked.value = isChecked
+
+                        val serviceIntent = Intent(context, LocationService::class.java).apply {
+                            action = if (isChecked) {
+                                LocationService.ACTION_FIND_NEARBY
+                            } else {
+                                LocationService.ACTION_STOP
                             }
+                        }
+
+                        if (isChecked) {
+                            Log.d("Switch", "Starting Location Service")
+                            context.startForegroundService(serviceIntent)
                             with(sharedPreferences.edit()) {
                                 putBoolean("tracking_location", true)
                                 apply()
                             }
                         } else {
-                            Intent(context, LocationService::class.java).apply {
-                                action = LocationService.ACTION_STOP
-                                context.stopService(this)
-                            }
-                            Intent(context, LocationService::class.java).apply {
-                                action = LocationService.ACTION_START
-                                context.startForegroundService(this)
-                            }
+                            Log.d("Switch", "Stopping Location Service")
+                            context.stopService(serviceIntent)
                             with(sharedPreferences.edit()) {
                                 putBoolean("tracking_location", false)
                                 apply()
                             }
                         }
                     },
+
                     thumbContent = if (checked.value) {
                         {
                             Icon(

@@ -10,7 +10,7 @@ interface RateRepository {
         eid: String
     ): Resource<List<Rate>>
     suspend fun getUserRates(): Resource<List<Rate>>
-    suspend fun getUserAdForEvent(): Resource<List<Rate>>
+
     suspend fun addRate(
         lid: String,
         rate: Int,

@@ -64,7 +64,7 @@ fun LoginPage(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(Color(0xFFbce6f6)) // Updated background color
+            .background(Color(0xFFbce6f6))
             .padding(16.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
@@ -77,7 +77,7 @@ fun LoginPage(
             color = Color(0xFFF75553),
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
-                .padding(bottom = 24.dp) // Add padding below the title
+                .padding(bottom = 24.dp)
         )
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -91,10 +91,10 @@ fun LoginPage(
 
             modifier = Modifier
                 .width(265.dp)
-                .height(60.dp) // Reduced height
+                .height(60.dp)
                 .border(2.dp, Color(0xFF2589a0))
-                .background(Color(0xFF2589a0)), // Background color for text field
-            textStyle = androidx.compose.ui.text.TextStyle(fontSize = 16.sp), // Reduced font size
+                .background(Color(0xFF2589a0)),
+            textStyle = androidx.compose.ui.text.TextStyle(fontSize = 16.sp),
 
         )
 
@@ -109,9 +109,9 @@ fun LoginPage(
             shape = RoundedCornerShape(16.dp),
             modifier = Modifier
                 .width(265.dp)
-                .height(60.dp) // Reduced height
-                .background(Color(0xFF2589a0)), // Background color for text field
-            textStyle = androidx.compose.ui.text.TextStyle(fontSize = 16.sp), // Reduced font size
+                .height(60.dp)
+                .background(Color(0xFF2589a0)),
+            textStyle = androidx.compose.ui.text.TextStyle(fontSize = 16.sp),
 
         )
 
@@ -126,7 +126,7 @@ fun LoginPage(
                 .height(48.dp), // Reduced height
             colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = Color(0xFFF75553))
         ) {
-            Text(text = "LOG IN", fontSize = 18.sp, color = Color.White) // Reduced font size
+            Text(text = "LOG IN", fontSize = 18.sp, color = Color.White)
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -135,7 +135,7 @@ fun LoginPage(
             onClick = { navController.navigate("signup") },
             modifier = Modifier.padding(horizontal = 16.dp)
         ) {
-            Text(text = "Don't have an account? Register!", fontSize = 18.sp, color = Color(0xFF2589a0)) // Reduced font size
+            Text(text = "Don't have an account? Register!", fontSize = 18.sp, color = Color(0xFF2589a0))
         }
     }
 }

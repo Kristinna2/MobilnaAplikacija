@@ -4,7 +4,6 @@ package com.example.app1
 
 import android.net.Uri
 import android.util.Log
-import com.example.aquaspot.model.service.StorageService
 import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -63,7 +62,6 @@ class EventRepositoryImplementation : EventRepository {
                     location = geoLocation
                 )
                 databaseService.saveEventData(event)
-               // databaseService.addPoints(currentUser.uid, 5)
             }
             Resource.Success("Uspesno sačuvani svi podaci o dogadjaju")
         }catch (e: Exception){
@@ -88,12 +86,12 @@ class EventRepositoryImplementation : EventRepository {
 
     override suspend fun getEventById(id: String): Resource<Event> {
         return try {
-            val snapshot = firestoreInstance.collection("landmarks").document(id).get().await()
-            val landmark = snapshot.toObject(Event::class.java)
-            if (landmark != null) {
-                Resource.Success(landmark)
+            val snapshot = firestoreInstance.collection("events").document(id).get().await()
+            val event = snapshot.toObject(Event::class.java)
+            if (event != null) {
+                Resource.Success(event)
             } else {
-                Resource.Failure(Exception("Landmark not found"))
+                Resource.Failure(Exception("Event not found"))
             }
         } catch (e: Exception) {
             e.printStackTrace()

@@ -36,6 +36,7 @@ fun EventFilterDialog(
     eventViewModel: EventViewModel = viewModel(),
     usersViewModel: UsersViewModel = viewModel()
 ) {
+
     var isCategoryDropdownExpanded by remember { mutableStateOf(false) }
     var isUserDropdownExpanded by remember { mutableStateOf(false) }
     var isEventNameDropdownExpanded by remember { mutableStateOf(false) }

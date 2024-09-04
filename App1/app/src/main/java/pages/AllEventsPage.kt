@@ -33,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -46,6 +47,7 @@ import com.example.app1.Resource
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun AllEventsPage(navController: NavController) {
+
     val eventViewModel: EventViewModel = viewModel()
     val events by eventViewModel.events.collectAsState()
 
@@ -116,7 +118,6 @@ fun EventRow(event: Event, navController: NavController) {
                 .horizontalScroll(rememberScrollState()),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Kolona za sliku
             val painter = rememberAsyncImagePainter(event.mainImage)
             Box(
                 modifier = Modifier
@@ -133,7 +134,7 @@ fun EventRow(event: Event, navController: NavController) {
 
             Text(
                 text = event.eventName ?: "Unnamed Event",
-                style = MaterialTheme.typography.bodyLarge,
+                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
                 color = Color.Black,
                 modifier = Modifier
                     .padding(horizontal = 8.dp)
@@ -172,10 +173,12 @@ fun EventRow(event: Event, navController: NavController) {
                     Log.d("EventRow", "Selected Event: $event")
                     navController.currentBackStackEntry?.savedStateHandle?.set("eventId", event.id)
                     selectedEventId = event.id
+                    navController.navigate("home")
+
                 },
                 modifier = Modifier.padding(start = 8.dp)
             ) {
-                Text(text = "Show on Map")
+                Text(text = "Search on Map")
             }
         }
     }

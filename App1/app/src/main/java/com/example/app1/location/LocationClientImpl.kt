@@ -50,7 +50,7 @@ class LocationClientImpl(
             client.requestLocationUpdates(
                 request,
                 locationCallback,
-                Looper.getMainLooper()
+                Looper.getMainLooper()//gl nit
             )
 
             awaitClose {

@@ -23,8 +23,7 @@ import pages.UsersPage
 @Composable
 fun MyAppNavigation(modifier: Modifier = Modifier,authViewModel: AuthViewModel) {
     val navController = rememberNavController()
-    //val location = remember { mutableStateOf<LatLng?>(null) }  // Koristimo remember za pamćenje lokacije
-   // val homeViewModel: HomeViewModel = viewModel()
+
     NavHost(navController = navController, startDestination = "login", builder = {
         composable("login"){
             LoginPage(modifier,navController,authViewModel)
@@ -51,7 +50,7 @@ fun MyAppNavigation(modifier: Modifier = Modifier,authViewModel: AuthViewModel) 
         composable("details") {
            DetailsPage(navController = navController)
         }
-        composable("allevents") { // Dodaj novu rutu za `AllEventsPage`
+        composable("allevents") {
             AllEventsPage(navController = navController)
         }
 

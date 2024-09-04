@@ -27,7 +27,6 @@ import java.util.UUID
 
 class EventViewModel: ViewModel() {
 
-
     val repository = EventRepositoryImplementation()
     val rateRepository = RateRepositoryImpl()
 
@@ -140,11 +139,9 @@ class EventViewModel: ViewModel() {
                Firebase.firestore.collection("events")
                    .add(eventData)
                    .addOnSuccessListener {
-                       // Uspješno spremljeno
                        _eventFlow.value = Resource.Success("Event successfully added!")
                    }
                    .addOnFailureListener {
-                       // Greška prilikom spremanja
                        _eventFlow.value = Resource.Failure(it)
                    }
            }
@@ -153,26 +150,7 @@ class EventViewModel: ViewModel() {
        }
    }
 
-    /* fun loadEventData(markerJson: String) {
-        val marker = Gson().fromJson(markerJson, Event::class.java)
-        Log.d("EventViewModel", "Loaded event: $marker")
-        setEventData(marker)
-    }*/
-    /* private val eventRepository = EventRepositoryImplementation()
-    private val _eventData = MutableStateFlow<Event?>(null)
 
-    // Metoda za učitavanje svih događaja
-    suspend fun loadAllEvents() {
-        when (val resource = eventRepository.getAllEvents()) {
-            is Resource.Success -> {
-                _eventData.value = resource.data?.firstOrNull() // Uzimamo prvi događaj kao primer
-            }
-            is Resource.Failure -> {
-                Log.e("EventViewModel", "Greška pri učitavanju događaja: ${resource.exception}")
-            }
-        }
-    }
-*/
     fun getEventAllRates(
         bid: String
     ) = viewModelScope.launch {
@@ -210,7 +188,7 @@ class EventViewModel: ViewModel() {
         }
 
         val filteredList = allEvents.filter { event: Event ->
-            Log.d("EventViewModel", "event.userId: ${event.userId}, userId: $userId") // Logovanje
+            Log.d("EventViewModel", "event.userId: ${event.userId}, userId: $userId")
 
             event.userId == userId
         }

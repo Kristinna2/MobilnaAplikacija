@@ -1,6 +1,7 @@
 package pages
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,6 +28,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -76,7 +78,7 @@ fun UserProfilePage(
     val scrollState = rememberScrollState()
 
     Column(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFbce6f6))
             .padding(16.dp)
@@ -102,6 +104,7 @@ fun UserProfilePage(
                 AsyncImage(
                     model = photoUrl,
                     contentDescription = "Profile Picture",
+                    contentScale = ContentScale.Crop,
                     modifier = Modifier.size(150.dp)
                 )
             } else {
@@ -131,15 +134,24 @@ fun UserProfilePage(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text(
-            text = "Points: ${points ?: "Nije bilo interakcije"}",
-            fontSize = 24.sp,
-            color = Color.Red
-        )
+        Box(
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .border(2.dp, Color(0xFF2589a0), shape = RoundedCornerShape(8.dp))
+                .background(Color.White, shape = RoundedCornerShape(8.dp))
+                .padding(16.dp)
+        ) {
+            Text(
+                text = "Points: ${points ?: "No interaction"}",
+                fontSize = 24.sp,
+                color = Color.Red
+            )
+        }
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        Text(
+
+    Text(
             text = "User's Events:",
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
